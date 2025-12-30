@@ -1,7 +1,13 @@
-import AppRouter from "./routes/AppRouter";
+import Header from "./layout/Header";
+import Footer from "./layout/Footer";
+import PageContent from "./layout/PageContent";
 
-function App() {
-  return <AppRouter />;
+export default function App() {
+  return (
+    <div className="min-h-screen flex flex-col">
+      <Header />
+      <PageContent />
+      <Footer />
+    </div>
+  );
 }
-
-export default App;
