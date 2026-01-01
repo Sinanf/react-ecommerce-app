@@ -6,6 +6,7 @@ import { Heart, ShoppingCart, Eye, ChevronLeft, ChevronRight, Star } from "lucid
 import ProductCard from "../components/ProductCard";
 import { getProductById, productDetails } from "../data/productPageData";
 
+
 export default function ProductPage() {
   const { id } = useParams();
   const product = useMemo(() => getProductById(id || 1), [id]);
