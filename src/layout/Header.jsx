@@ -124,12 +124,12 @@ export default function Header() {
           <div className="flex flex-row items-center gap-4">
             {/* desktop: login/register text (placeholder) */}
             <Link
-  to="/signup"
-  className="hidden md:flex flex-row items-center gap-2 text-[14px] leading-[24px] tracking-[0.2px] text-[#23A6F0]"
->
-  <Settings className="w-4 h-4" />
-  <span className="font-bold">Login / Register</span>
-</Link>
+              to="/signup"
+              className="hidden md:flex flex-row items-center gap-2 text-[14px] leading-[24px] tracking-[0.2px] text-[#23A6F0]"
+            >
+              <Settings className="w-4 h-4" />
+              <span className="font-bold">Login / Register</span>
+            </Link>
 
 
             <button className="p-1" aria-label="Search">
