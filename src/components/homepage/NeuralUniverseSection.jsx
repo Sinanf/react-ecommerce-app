@@ -1,6 +1,6 @@
 // src/components/homepage/NeuralUniverseSection.jsx
 import { Link } from "react-router-dom";
-import { neuralUniverse } from "../../data/homepageData";
+import { neuralUniverse } from "../../data/homePageData";
 
 export default function NeuralUniverseSection() {
   return (

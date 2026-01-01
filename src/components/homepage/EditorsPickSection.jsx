@@ -1,5 +1,5 @@
 // src/components/homepage/EditorsPickSection.jsx
-import { editorsPick } from "../../data/homepageData";
+import { editorsPick } from "../../data/homePageData";
 
 export default function EditorsPickSection() {
   return (

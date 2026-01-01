@@ -73,22 +73,52 @@ export default function Header() {
 
           {/* Desktop nav */}
           <nav className="hidden md:flex flex-row items-center gap-6">
-            <NavLink to="/" onClick={closeMenu} className={navClass(navBaseDesktop)}>
-              Home
-            </NavLink>
+            {/* HOME + DROPDOWN WRAPPER */}
+            <div className="relative group">
+              <NavLink
+                to="/"
+                onClick={closeMenu}
+                className={navClass(navBaseDesktop)}
+              >
+                Home
+              </NavLink>
+
+              {/* hover bridge: link ile dropdown arası boşluğu kapatır */}
+              <div className="hidden group-hover:block absolute left-0 top-full h-2 w-full" />
+
+              {/* Dropdown */}
+              <div className="hidden group-hover:flex absolute left-0 top-full flex-col bg-white border border-[#E6E6E6] rounded-[6px] py-2 min-w-[auto] z-50">
+                <NavLink
+                  to="/team"
+                  onClick={(e) => {
+                    closeMenu();
+                    e.currentTarget.blur();
+                  }}
+                  className="px-4 py-2 text-[14px] leading-[24px] tracking-[0.2px] text-[#737373] hover:text-[#252B42]"
+                >
+                  Team
+                </NavLink>
+              </div>
+            </div>
+
+
             <NavLink to="/shop" onClick={closeMenu} className={navClass(navBaseDesktop)}>
               Shop
             </NavLink>
+
             <NavLink to="/about" onClick={closeMenu} className={navClass(navBaseDesktop)}>
               About
             </NavLink>
+
             <NavLink to="/blog/1" onClick={closeMenu} className={navClass(navBaseDesktop)}>
               Blog
             </NavLink>
+
             <NavLink to="/contact" onClick={closeMenu} className={navClass(navBaseDesktop)}>
               Contact
             </NavLink>
           </nav>
+
 
           {/* Right side icons */}
           <div className="flex flex-row items-center gap-4">
@@ -125,6 +155,8 @@ export default function Header() {
           <NavLink to="/" onClick={closeMenu} className={navClass(navBaseMobile)}>
             Home
           </NavLink>
+
+
           <NavLink to="/shop" onClick={closeMenu} className={navClass(navBaseMobile)}>
             Shop
           </NavLink>
@@ -133,6 +165,9 @@ export default function Header() {
           </NavLink>
           <NavLink to="/blog/1" onClick={closeMenu} className={navClass(navBaseMobile)}>
             Blog
+          </NavLink>
+          <NavLink to="/team" onClick={closeMenu} className={navClass(navBaseMobile)}>
+            Team
           </NavLink>
           <NavLink to="/contact" onClick={closeMenu} className={navClass(navBaseMobile)}>
             Contact

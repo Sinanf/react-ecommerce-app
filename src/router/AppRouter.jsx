@@ -9,6 +9,7 @@ import ContactPage from "../pages/ContactPage";
 import AboutPage from "../pages/AboutPage";
 import BlogPostPage from "../pages/BlogPostPage";
 import NotFoundPage from "../pages/NotFoundPage";
+import TeamPage from "../pages/TeamPage";
 
 export default function AppRouter() {
   return (
@@ -23,6 +24,7 @@ export default function AppRouter() {
 
       <Route path="/pricing" element={<PricingPage />} />
       <Route path="/contact" element={<ContactPage />} />
+      <Route path="/team" element={<TeamPage />} />
       <Route path="/about" element={<AboutPage />} />
 
       <Route path="/blog/:id" element={<BlogPostPage />} />

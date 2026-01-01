@@ -1,6 +1,6 @@
 // src/components/homepage/BestsellerSection.jsx
 import ProductCard from "../ProductCard";
-import { bestsellerProducts } from "../../data/homepageData";
+import { bestsellerProducts } from "../../data/homePageData";
 
 export default function BestsellerSection() {
   return (

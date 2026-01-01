@@ -1,4 +1,4 @@
-// src/data/homepageData.js
+// src/data/homePageData.js
 
 export const heroSlides = [
   {

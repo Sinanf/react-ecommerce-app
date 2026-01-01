@@ -6,7 +6,7 @@ import "swiper/css/navigation";
 import "swiper/css/pagination";
 
 import { Link } from "react-router-dom";
-import { vitaClassicSlides } from "../../data/homepageData";
+import { vitaClassicSlides } from "../../data/homePageData";
 
 export default function VitaSection() {
   // Eğer data tek slide ise, slider görsel olarak "slide" gibi çalışsın diye 2'liyoruz

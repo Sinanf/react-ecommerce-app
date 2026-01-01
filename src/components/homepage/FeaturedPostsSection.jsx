@@ -1,6 +1,6 @@
 // src/components/homepage/FeaturedPostsSection.jsx
 import { Link } from "react-router-dom";
-import { featuredPosts } from "../../data/homepageData";
+import { featuredPosts } from "../../data/homePageData";
 
 export default function FeaturedPostsSection() {
   return (

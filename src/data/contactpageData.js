@@ -1,4 +1,4 @@
-// src/data/contactpageData.js
+// src/data/contactPageData.js
 
 export const contactHero = {
   title: "Get answers\nto all your\nquestions.",

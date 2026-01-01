@@ -5,7 +5,7 @@ import "swiper/css";
 import "swiper/css/navigation";
 import "swiper/css/pagination";
 import { Link } from "react-router-dom";
-import { heroSlides, vitaClassicSlides } from "../../data/homepageData";
+import { heroSlides, vitaClassicSlides } from "../../data/homePageData";
 
 export default function HeroSection() {
   const slides = [...heroSlides, ...vitaClassicSlides];
