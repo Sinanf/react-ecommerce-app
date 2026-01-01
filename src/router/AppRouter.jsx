@@ -10,7 +10,7 @@ import AboutPage from "../pages/AboutPage";
 import BlogPostPage from "../pages/BlogPostPage";
 import NotFoundPage from "../pages/NotFoundPage";
 import TeamPage from "../pages/TeamPage";
-import SignUpPage from "../pages/SignupPage";
+import SignUpPage from "../pages/SignUpPage";
 
 export default function AppRouter() {
   return (
