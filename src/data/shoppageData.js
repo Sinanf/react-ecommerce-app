@@ -1,4 +1,4 @@
-// src/data/shopPageData.js
+// src/data/shoppageData.js
 
 export const shopCategories = [
   { id: "c1", title: "CLOTHS", items: "5 Items", img: "https://picsum.photos/600/600?random=11" },
