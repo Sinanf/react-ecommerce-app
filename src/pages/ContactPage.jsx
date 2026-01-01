@@ -2,7 +2,7 @@
 
 import { Link } from "react-router-dom";
 import { Twitter, Facebook, Instagram, Linkedin } from "lucide-react";
-import { contactHero, contactSocials } from "../data/contactpageData";
+import { contactHero, contactSocials } from "src/data/contactPageData.js";
 
 const iconMap = {
   Twitter,

@@ -16,7 +16,7 @@ export const teamGallery = {
 };
 
 export const teamMembers = [
-  // ✅ required: you
+  
   {
     id: "me",
     name: "Sinan Faik Özdemir",

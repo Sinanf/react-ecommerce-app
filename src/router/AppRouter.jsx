@@ -18,7 +18,7 @@ export default function AppRouter() {
 
       <Route path="/shop" element={<ShopPage />} />
 
-      {/* Product Detail */}
+      
       <Route path="/product" element={<ProductPage />} />
       <Route path="/product/:id" element={<ProductPage />} />
 
