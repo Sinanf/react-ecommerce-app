@@ -1,7 +1,7 @@
 // src/pages/ShopPage.jsx
 import { Link } from "react-router-dom";
 import ProductCard from "../components/ProductCard";
-import { shopCategories, shopProducts } from "../data/shoppageData";
+import { shopCategories, shopProducts } from "../data/shopPageData";
 
 export default function ShopPage() {
   return (
