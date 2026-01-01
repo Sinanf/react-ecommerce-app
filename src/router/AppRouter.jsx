@@ -18,9 +18,8 @@ export default function AppRouter() {
       <Route path="/shop" element={<ShopPage />} />
 
       {/* Product Detail */}
-      <Route path="/product/:id" element={<ProductPage />} />
-      {/* (opsiyonel) /product yazılırsa default bir ürün açsın */}
       <Route path="/product" element={<ProductPage />} />
+      <Route path="/product/:id" element={<ProductPage />} />
 
       <Route path="/pricing" element={<PricingPage />} />
       <Route path="/contact" element={<ContactPage />} />

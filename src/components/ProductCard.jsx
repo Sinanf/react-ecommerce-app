@@ -1,3 +1,4 @@
+// src/components/ProductCard.jsx
 import { Link } from "react-router-dom";
 
 export default function ProductCard({
@@ -9,7 +10,7 @@ export default function ProductCard({
   priceNew,
 }) {
   return (
-    <Link to={`/product/${id}`} className="w-full flex">
+    <Link to={id ? `/product/${id}` : "/product"} className="w-full">
       <div className="w-full flex flex-col bg-white">
         {/* image */}
         <div className="w-full flex flex-col">
