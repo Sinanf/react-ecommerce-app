@@ -1,4 +1,4 @@
-// src/data/productPageData
+// src/data/productPageData.jsx
 
 export const productDetails = Array.from({ length: 12 }).map((_, i) => {
   const id = i + 1;

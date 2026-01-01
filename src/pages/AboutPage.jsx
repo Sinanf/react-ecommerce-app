@@ -148,23 +148,6 @@ export default function AboutPage() {
         </div>
       </section>
 
-      {/* BIG COMPANIES */}
-      <section className="w-full">
-        <div className="w-full max-w-6xl mx-auto px-4 py-12 flex flex-col items-center">
-          <div className="font-bold text-[40px] leading-[50px] tracking-[0.2px] text-[#252B42] text-center">
-            {bigCompanies.title}
-          </div>
-          <div className="mt-2 text-[14px] leading-[20px] tracking-[0.2px] text-[#737373] text-center max-w-[560px]">
-            {bigCompanies.desc}
-          </div>
-
-          <div className="w-full mt-10 flex flex-row flex-wrap items-center justify-center gap-10 opacity-60">
-            {bigCompanies.logos.map((l) => (
-              <img key={l.id} src={l.img} alt={l.name} className="h-8" />
-            ))}
-          </div>
-        </div>
-      </section>
 
       {/* WORK WITH US */}
       <section className="w-full">
@@ -201,6 +184,20 @@ export default function AboutPage() {
               className="w-full h-[320px] md:h-[520px] object-cover"
             />
           </div>
+        </div>
+      </section>
+
+      {/* BIG COMPANIES */}
+      <section className="w-full">
+        <div className="w-full max-w-6xl mx-auto px-4 py-12 flex flex-col items-center">
+          <div className="font-bold text-[40px] leading-[50px] tracking-[0.2px] text-[#252B42] text-center">
+            {bigCompanies.title}
+          </div>
+          <div className="mt-2 text-[14px] leading-[20px] tracking-[0.2px] text-[#737373] text-center max-w-[560px]">
+            {bigCompanies.desc}
+          </div>
+
+          <div className="w-full mt-10 flex flex-row flex-wrap items-center justify-center gap-10 opacity-60"></div>
         </div>
       </section>
     </div>

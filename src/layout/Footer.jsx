@@ -4,6 +4,7 @@ import { Facebook, Instagram, Twitter } from "lucide-react";
 export default function Footer() {
   return (
     <footer className="w-full bg-white border-t border-[#E6E6E6]">
+      
       {/* BRAND STRIP */}
       <div className="w-full border-b border-[#E6E6E6]">
         <div className="max-w-6xl mx-auto px-4 py-10 flex flex-wrap items-center justify-center gap-10 opacity-60">
@@ -14,7 +15,7 @@ export default function Footer() {
           <img src="/assets/homepage/fa-brands-3.png" alt="reddit" className="h-8" />
         </div>
       </div>
-
+      
       {/* MAIN FOOTER */}
       <div className="w-full max-w-6xl mx-auto px-4 py-12 flex flex-col gap-12">
         {/* TOP */}

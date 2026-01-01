@@ -123,10 +123,14 @@ export default function Header() {
           {/* Right side icons */}
           <div className="flex flex-row items-center gap-4">
             {/* desktop: login/register text (placeholder) */}
-            <div className="hidden md:flex flex-row items-center gap-2 text-[14px] leading-[24px] tracking-[0.2px] text-[#23A6F0]">
-              <Settings className="w-4 h-4" />
-              <span className="font-bold">Login / Register</span>
-            </div>
+            <Link
+  to="/signup"
+  className="hidden md:flex flex-row items-center gap-2 text-[14px] leading-[24px] tracking-[0.2px] text-[#23A6F0]"
+>
+  <Settings className="w-4 h-4" />
+  <span className="font-bold">Login / Register</span>
+</Link>
+
 
             <button className="p-1" aria-label="Search">
               <Search className="w-5 h-5 text-[#23A6F0] md:text-[#23A6F0]" />
@@ -172,6 +176,10 @@ export default function Header() {
           <NavLink to="/contact" onClick={closeMenu} className={navClass(navBaseMobile)}>
             Contact
           </NavLink>
+          <NavLink to="/signup" onClick={closeMenu} className={navClass(navBaseMobile)}>
+            Signup
+          </NavLink>
+
         </nav>
       )}
     </header>
