@@ -11,6 +11,7 @@ import BlogPostPage from "../pages/BlogPostPage";
 import NotFoundPage from "../pages/NotFoundPage";
 import TeamPage from "../pages/TeamPage";
 import SignUpPage from "../pages/SignUpPage";
+import LoginPage from "../pages/LoginPage";
 
 export default function AppRouter() {
   return (
@@ -20,6 +21,7 @@ export default function AppRouter() {
       <Route path="/shop" element={<ShopPage />} />
 
       <Route path="/signup" element={<SignUpPage />} />
+      <Route path="/login" element={<LoginPage />} />
 
       <Route path="/product" element={<ProductPage />} />
       <Route path="/product/:id" element={<ProductPage />} />

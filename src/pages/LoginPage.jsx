@@ -22,14 +22,18 @@ const navBaseDesktop =
 const navActive = "text-[#252B42]";
 
 export default function Header() {
-  const location = useLocation();
-  const user = useSelector((s) => s?.client?.user || {});
-  const isLoggedIn = Boolean(user?.email); // basit kontrol
-
   const [open, setOpen] = useState(false);
   const closeMenu = () => setOpen(false);
+
+  const location = useLocation();
+  const user = useSelector((s) => s?.client?.user);
+
   const navClass = (base) => ({ isActive }) =>
     `${base} ${isActive ? navActive : ""}`;
+
+  const isLoggedIn = user && Object.keys(user).length > 0;
+  const displayName = user?.name || user?.email || "User";
+  const avatarUrl = user?.gravatarUrl;
 
   return (
     <header className="w-full flex flex-col bg-white">
@@ -110,39 +114,30 @@ export default function Header() {
             </NavLink>
           </nav>
 
-          {/* Right side icons */}
+          {/* Right side */}
           <div className="flex flex-row items-center gap-4">
-            {/* Desktop: user area */}
-            {isLoggedIn ? (
-              <div className="hidden md:flex items-center gap-2">
-                <img
-                  src={user.gravatarUrl}
-                  alt="User avatar"
-                  className="w-8 h-8 rounded-full"
-                  referrerPolicy="no-referrer"
-                />
-                <span className="text-[14px] text-[#252B42] font-bold">
-                  {user.name || user.email}
-                </span>
-              </div>
-            ) : (
-              <div className="hidden md:flex items-center gap-2 text-[14px] leading-[24px] tracking-[0.2px] text-[#23A6F0]">
+            {/* LOGIN AREA */}
+            {!isLoggedIn ? (
+              <Link
+                to="/login"
+                state={{ from: location }}
+                className="hidden md:flex flex-row items-center gap-2 text-[14px] leading-[24px] tracking-[0.2px] text-[#23A6F0]"
+              >
                 <Settings className="w-4 h-4" />
-                <Link
-                  to="/login"
-                  state={{ from: location }}
-                  className="font-bold"
-                >
-                  Login
-                </Link>
-                <span>/</span>
-                <Link
-                  to="/signup"
-                  state={{ from: location }}
-                  className="font-bold"
-                >
-                  Register
-                </Link>
+                <span className="font-bold">Login / Register</span>
+              </Link>
+            ) : (
+              <div className="hidden md:flex items-center gap-2 text-[14px] text-[#252B42]">
+                {avatarUrl ? (
+                  <img
+                    src={avatarUrl}
+                    alt="avatar"
+                    className="w-8 h-8 rounded-full border border-[#E6E6E6]"
+                  />
+                ) : (
+                  <div className="w-8 h-8 rounded-full bg-[#E6E6E6]" />
+                )}
+                <span className="font-bold">{displayName}</span>
               </div>
             )}
 
@@ -155,7 +150,6 @@ export default function Header() {
               <span className="hidden md:inline text-[12px] text-[#23A6F0]">1</span>
             </button>
 
-            {/* mobile hamburger */}
             <button
               className="p-1 md:hidden"
               aria-label="Menu"
@@ -189,37 +183,12 @@ export default function Header() {
             Contact
           </NavLink>
 
-          {isLoggedIn ? (
-            <div className="flex flex-col items-center gap-2">
-              <img
-                src={user.gravatarUrl}
-                alt="User avatar"
-                className="w-10 h-10 rounded-full"
-                referrerPolicy="no-referrer"
-              />
-              <div className="text-[18px] text-[#252B42] font-bold">
-                {user.name || user.email}
-              </div>
-            </div>
+          {!isLoggedIn ? (
+            <Link to="/login" state={{ from: location }} onClick={closeMenu} className={navBaseMobile}>
+              Login
+            </Link>
           ) : (
-            <>
-              <Link
-                to="/login"
-                state={{ from: location }}
-                onClick={closeMenu}
-                className={navBaseMobile}
-              >
-                Login
-              </Link>
-              <Link
-                to="/signup"
-                state={{ from: location }}
-                onClick={closeMenu}
-                className={navBaseMobile}
-              >
-                Register
-              </Link>
-            </>
+            <div className={navBaseMobile}>{displayName}</div>
           )}
         </nav>
       )}
