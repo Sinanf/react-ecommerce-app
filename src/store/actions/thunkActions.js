@@ -1,8 +1,10 @@
+// src/store/actions/thunkActions.js
+
 import { toast } from "react-toastify";
 import md5 from "blueimp-md5";
 import { api, setAuthToken, clearAuthToken } from "../../api/api";
 import { setUser, setRoles } from "./clientActions";
-import { setCategories, setFetchState } from "./productActions";
+import { setCategories, setFetchState, setProductList, setTotal, setProductFetchState } from "./productActions";
 
 /* --------------------------------------------------
    Helpers
@@ -119,10 +121,11 @@ export const fetchRolesIfNeeded = () => async (dispatch, getState) => {
   }
 };
 
-/* --------------------------------------------------
-   CATEGORIES
--------------------------------------------------- */
+/* ... login / verify / logout / roles ... */
 
+/* --------------------------------------------------
+   CATEGORIES (T12) - senin mevcut halin aynı kalabilir
+-------------------------------------------------- */
 export const fetchCategoriesIfNeeded = () => async (dispatch, getState) => {
   const categories = getState()?.product?.categories;
   if (Array.isArray(categories) && categories.length > 0) return;
@@ -137,6 +140,34 @@ export const fetchCategoriesIfNeeded = () => async (dispatch, getState) => {
     dispatch(setFetchState("FAILED"));
     toast.error("Categories could not be loaded");
     console.error("fetchCategoriesIfNeeded error:", err);
+  }
+};
+
+/* --------------------------------------------------
+   PRODUCTS (T13)
+-------------------------------------------------- */
+export const fetchProducts = () => async (dispatch) => {
+  try {
+    dispatch(setProductFetchState("FETCHING"));
+
+    // İstersen buraya query param ekleriz (limit/offset/filter/categoryId)
+    // şimdilik base endpoint:
+    const res = await api.get("/products");
+
+    const data = res?.data || {};
+    const total = Number(data?.total || 0);
+    const products = Array.isArray(data?.products) ? data.products : [];
+
+    dispatch(setTotal(total));
+    dispatch(setProductList(products));
+
+    dispatch(setProductFetchState("FETCHED"));
+    return { ok: true };
+  } catch (err) {
+    dispatch(setProductFetchState("FAILED"));
+    toast.error("Products could not be loaded");
+    console.error("fetchProducts error:", err);
+    return { ok: false };
   }
 };
 
