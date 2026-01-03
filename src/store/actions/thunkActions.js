@@ -2,6 +2,7 @@ import { toast } from "react-toastify";
 import md5 from "blueimp-md5";
 import { api, setAuthToken, clearAuthToken } from "../../api/api";
 import { setUser, setRoles } from "./clientActions";
+import { setCategories, setFetchState } from "./productActions";
 
 /* --------------------------------------------------
    Helpers
@@ -117,3 +118,25 @@ export const fetchRolesIfNeeded = () => async (dispatch, getState) => {
     console.error("fetchRolesIfNeeded error:", err);
   }
 };
+
+/* --------------------------------------------------
+   CATEGORIES
+-------------------------------------------------- */
+
+export const fetchCategoriesIfNeeded = () => async (dispatch, getState) => {
+  const categories = getState()?.product?.categories;
+  if (Array.isArray(categories) && categories.length > 0) return;
+
+  try {
+    dispatch(setFetchState("FETCHING"));
+    const res = await api.get("/categories");
+    const list = Array.isArray(res.data) ? res.data : [];
+    dispatch(setCategories(list));
+    dispatch(setFetchState("FETCHED"));
+  } catch (err) {
+    dispatch(setFetchState("FAILED"));
+    toast.error("Categories could not be loaded");
+    console.error("fetchCategoriesIfNeeded error:", err);
+  }
+};
+

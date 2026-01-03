@@ -8,13 +8,14 @@ import PageContent from "./layout/PageContent";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
-import { verifyToken } from "./store/actions/thunkActions";
+import { fetchCategoriesIfNeeded, verifyToken } from "./store/actions/thunkActions";
 
 export default function App() {
   const dispatch = useDispatch();
 
   useEffect(() => {
     dispatch(verifyToken());
+    dispatch(fetchCategoriesIfNeeded());
   }, [dispatch]);
 
   return (
