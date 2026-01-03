@@ -2,5 +2,18 @@ import axios from "axios";
 
 export const api = axios.create({
   baseURL: "https://workintech-fe-ecommerce.onrender.com",
-  timeout: 30000, // 15s -> 30s (uykudan uyanma gecikmeleri için)
+  timeout: 30000,
 });
+
+// NOT: Bearer YOK!
+export const setAuthToken = (token) => {
+  if (token) {
+    api.defaults.headers.common["Authorization"] = token;
+  } else {
+    delete api.defaults.headers.common["Authorization"];
+  }
+};
+
+export const clearAuthToken = () => {
+  delete api.defaults.headers.common["Authorization"];
+};

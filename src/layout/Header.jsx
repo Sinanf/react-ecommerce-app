@@ -13,7 +13,8 @@ import {
   Twitter,
 } from "lucide-react";
 import { Link, NavLink, useLocation } from "react-router-dom";
-import { useSelector } from "react-redux";
+import { useSelector, useDispatch } from "react-redux";
+import { logoutUser } from "../store/actions/thunkActions";
 
 const navBaseMobile =
   "text-[30px] leading-[45px] tracking-[0.2px] text-[#737373]";
@@ -23,11 +24,14 @@ const navActive = "text-[#252B42]";
 
 export default function Header() {
   const location = useLocation();
+   const dispatch = useDispatch();
+
   const user = useSelector((s) => s?.client?.user || {});
-  const isLoggedIn = Boolean(user?.email); // basit kontrol
+  const isLoggedIn = Boolean(user?.email);
 
   const [open, setOpen] = useState(false);
   const closeMenu = () => setOpen(false);
+
   const navClass = (base) => ({ isActive }) =>
     `${base} ${isActive ? navActive : ""}`;
 
@@ -36,6 +40,7 @@ export default function Header() {
       {/* TOP INFO BAR (desktop) */}
       <div className="hidden md:flex w-full bg-[#23856D] text-white">
         <div className="w-full max-w-6xl mx-auto px-4 h-12 flex flex-row items-center justify-between">
+          {/* left */}
           <div className="flex flex-row items-center gap-6 text-[14px] leading-[24px] tracking-[0.2px]">
             <div className="flex flex-row items-center gap-2">
               <Phone className="w-4 h-4" />
@@ -47,10 +52,12 @@ export default function Header() {
             </div>
           </div>
 
+          {/* center */}
           <div className="text-[14px] leading-[24px] tracking-[0.2px] font-bold">
             Follow Us and get a chance to win 80% off
           </div>
 
+          {/* right */}
           <div className="flex flex-row items-center gap-3 text-[14px] leading-[24px] tracking-[0.2px]">
             <span className="font-bold">Follow Us :</span>
             <Instagram className="w-4 h-4" />
@@ -75,13 +82,20 @@ export default function Header() {
 
           {/* Desktop nav */}
           <nav className="hidden md:flex flex-row items-center gap-6">
+            {/* HOME + DROPDOWN WRAPPER */}
             <div className="relative group">
-              <NavLink to="/" onClick={closeMenu} className={navClass(navBaseDesktop)}>
+              <NavLink
+                to="/"
+                onClick={closeMenu}
+                className={navClass(navBaseDesktop)}
+              >
                 Home
               </NavLink>
 
+              {/* hover bridge */}
               <div className="hidden group-hover:block absolute left-0 top-full h-2 w-full" />
 
+              {/* Dropdown */}
               <div className="hidden group-hover:flex absolute left-0 top-full flex-col bg-white border border-[#E6E6E6] rounded-[6px] py-2 min-w-[auto] z-50">
                 <NavLink
                   to="/team"
@@ -96,16 +110,35 @@ export default function Header() {
               </div>
             </div>
 
-            <NavLink to="/shop" onClick={closeMenu} className={navClass(navBaseDesktop)}>
+            <NavLink
+              to="/shop"
+              onClick={closeMenu}
+              className={navClass(navBaseDesktop)}
+            >
               Shop
             </NavLink>
-            <NavLink to="/about" onClick={closeMenu} className={navClass(navBaseDesktop)}>
+
+            <NavLink
+              to="/about"
+              onClick={closeMenu}
+              className={navClass(navBaseDesktop)}
+            >
               About
             </NavLink>
-            <NavLink to="/blog/1" onClick={closeMenu} className={navClass(navBaseDesktop)}>
+
+            <NavLink
+              to="/blog/1"
+              onClick={closeMenu}
+              className={navClass(navBaseDesktop)}
+            >
               Blog
             </NavLink>
-            <NavLink to="/contact" onClick={closeMenu} className={navClass(navBaseDesktop)}>
+
+            <NavLink
+              to="/contact"
+              onClick={closeMenu}
+              className={navClass(navBaseDesktop)}
+            >
               Contact
             </NavLink>
           </nav>
@@ -114,32 +147,46 @@ export default function Header() {
           <div className="flex flex-row items-center gap-4">
             {/* Desktop: user area */}
             {isLoggedIn ? (
-              <div className="hidden md:flex items-center gap-2">
-                <img
-                  src={user.gravatarUrl}
-                  alt="User avatar"
-                  className="w-8 h-8 rounded-full"
-                  referrerPolicy="no-referrer"
-                />
-                <span className="text-[14px] text-[#252B42] font-bold">
-                  {user.name || user.email}
-                </span>
-              </div>
-            ) : (
+      <div className="hidden md:flex items-center gap-3 text-[14px] text-[#252B42]">
+        {user?.gravatarUrl ? (
+          <img
+            src={user.gravatarUrl}
+            alt="avatar"
+            className="w-8 h-8 rounded-full border border-[#E6E6E6]"
+            referrerPolicy="no-referrer"
+          />
+        ) : (
+          <div className="w-8 h-8 rounded-full bg-[#E6E6E6]" />
+        )}
+
+        <span className="font-bold">{user?.name || user?.email}</span>
+
+        <button
+          type="button"
+          onClick={() => dispatch(logoutUser())}
+          className="text-[#23A6F0] font-bold"
+        >
+          Logout
+        </button>
+      </div>
+    ) : (
               <div className="hidden md:flex items-center gap-2 text-[14px] leading-[24px] tracking-[0.2px] text-[#23A6F0]">
                 <Settings className="w-4 h-4" />
+
                 <Link
                   to="/login"
                   state={{ from: location }}
-                  className="font-bold"
+                  className="font-bold hover:underline underline-offset-4"
                 >
                   Login
                 </Link>
+
                 <span>/</span>
+
                 <Link
                   to="/signup"
                   state={{ from: location }}
-                  className="font-bold"
+                  className="font-bold hover:underline underline-offset-4"
                 >
                   Register
                 </Link>
@@ -150,9 +197,14 @@ export default function Header() {
               <Search className="w-5 h-5 text-[#23A6F0]" />
             </button>
 
-            <button className="p-1 flex flex-row items-center gap-1" aria-label="Cart">
+            <button
+              className="p-1 flex flex-row items-center gap-1"
+              aria-label="Cart"
+            >
               <ShoppingCart className="w-5 h-5 text-[#23A6F0]" />
-              <span className="hidden md:inline text-[12px] text-[#23A6F0]">1</span>
+              <span className="hidden md:inline text-[12px] text-[#23A6F0]">
+                1
+              </span>
             </button>
 
             {/* mobile hamburger */}
@@ -173,32 +225,59 @@ export default function Header() {
           <NavLink to="/" onClick={closeMenu} className={navClass(navBaseMobile)}>
             Home
           </NavLink>
-          <NavLink to="/shop" onClick={closeMenu} className={navClass(navBaseMobile)}>
+
+          <NavLink
+            to="/shop"
+            onClick={closeMenu}
+            className={navClass(navBaseMobile)}
+          >
             Shop
           </NavLink>
-          <NavLink to="/about" onClick={closeMenu} className={navClass(navBaseMobile)}>
+
+          <NavLink
+            to="/about"
+            onClick={closeMenu}
+            className={navClass(navBaseMobile)}
+          >
             About
           </NavLink>
-          <NavLink to="/blog/1" onClick={closeMenu} className={navClass(navBaseMobile)}>
+
+          <NavLink
+            to="/blog/1"
+            onClick={closeMenu}
+            className={navClass(navBaseMobile)}
+          >
             Blog
           </NavLink>
-          <NavLink to="/team" onClick={closeMenu} className={navClass(navBaseMobile)}>
+
+          <NavLink
+            to="/team"
+            onClick={closeMenu}
+            className={navClass(navBaseMobile)}
+          >
             Team
           </NavLink>
-          <NavLink to="/contact" onClick={closeMenu} className={navClass(navBaseMobile)}>
+
+          <NavLink
+            to="/contact"
+            onClick={closeMenu}
+            className={navClass(navBaseMobile)}
+          >
             Contact
           </NavLink>
 
           {isLoggedIn ? (
             <div className="flex flex-col items-center gap-2">
-              <img
-                src={user.gravatarUrl}
-                alt="User avatar"
-                className="w-10 h-10 rounded-full"
-                referrerPolicy="no-referrer"
-              />
+              {!!user?.gravatarUrl && (
+                <img
+                  src={user.gravatarUrl}
+                  alt="User avatar"
+                  className="w-10 h-10 rounded-full"
+                  referrerPolicy="no-referrer"
+                />
+              )}
               <div className="text-[18px] text-[#252B42] font-bold">
-                {user.name || user.email}
+                {user?.name || user?.email}
               </div>
             </div>
           ) : (
@@ -211,6 +290,7 @@ export default function Header() {
               >
                 Login
               </Link>
+
               <Link
                 to="/signup"
                 state={{ from: location }}
