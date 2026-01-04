@@ -53,6 +53,23 @@ export default function Header() {
 
   const categories = useSelector((s) => s?.product?.categories || []);
 
+    const cart = useSelector((s) => s?.shoppingCart?.cart || []);
+
+  const cartCount = useMemo(() => {
+    return cart.reduce((sum, item) => sum + (Number(item?.count) || 0), 0);
+  }, [cart]);
+
+  const cartTotal = useMemo(() => {
+    return cart.reduce((sum, item) => {
+      const price = Number(item?.product?.price) || 0;
+      const count = Number(item?.count) || 0;
+      return sum + price * count;
+    }, 0);
+  }, [cart]);
+
+  const [cartOpen, setCartOpen] = useState(false);
+
+
   const [open, setOpen] = useState(false);
   const closeMenu = () => setOpen(false);
 
@@ -313,10 +330,117 @@ export default function Header() {
               <Search className="w-5 h-5 text-[#23A6F0]" />
             </button>
 
-            <button className="p-1 flex flex-row items-center gap-1" aria-label="Cart">
-              <ShoppingCart className="w-5 h-5 text-[#23A6F0]" />
-              <span className="hidden md:inline text-[12px] text-[#23A6F0]">1</span>
-            </button>
+            <div className="relative">
+  <button
+    type="button"
+    className="p-1 flex flex-row items-center gap-1"
+    aria-label="Cart"
+    onClick={() => setCartOpen((v) => !v)}
+  >
+    <ShoppingCart className="w-5 h-5 text-[#23A6F0]" />
+
+    {/* badge */}
+    <span className="hidden md:inline text-[12px] text-[#23A6F0] font-bold">
+      {cartCount}
+    </span>
+
+    {/* küçük kırmızı nokta/badge (opsiyonel, mobilde de görünsün diye) */}
+    {cartCount > 0 && (
+      <span className="absolute -top-1 -right-1 min-w-[18px] h-[18px] px-1 rounded-full bg-red-500 text-white text-[11px] leading-[18px] text-center">
+        {cartCount}
+      </span>
+    )}
+  </button>
+
+  {/* Dropdown */}
+  {cartOpen && (
+    <div className="absolute right-0 mt-3 w-[320px] bg-white border border-[#E6E6E6] rounded-[10px] shadow-lg z-50 overflow-hidden">
+      <div className="px-4 py-3 border-b border-[#E6E6E6] flex items-center justify-between">
+        <div className="font-bold text-[#252B42] text-[14px]">
+          Shopping Cart ({cartCount})
+        </div>
+        <button
+          type="button"
+          onClick={() => setCartOpen(false)}
+          className="text-[#737373] text-[14px]"
+        >
+          ✕
+        </button>
+      </div>
+
+      <div className="max-h-[320px] overflow-y-auto">
+        {cart.length === 0 ? (
+          <div className="px-4 py-6 text-[#737373] text-[14px]">
+            Cart is empty.
+          </div>
+        ) : (
+          cart.map((item) => {
+            const p = item?.product || {};
+            const img = p?.images?.[0]?.url;
+
+            return (
+              <div
+                key={p.id}
+                className="px-4 py-3 border-b border-[#F2F2F2] flex gap-3"
+              >
+                <div className="w-[64px] h-[64px] rounded-[8px] overflow-hidden bg-[#FAFAFA] border border-[#E6E6E6] shrink-0">
+                  <img
+                    src={img || "https://picsum.photos/200/200?random=1"}
+                    alt={p?.name || "product"}
+                    className="w-full h-full object-cover"
+                  />
+                </div>
+
+                <div className="flex-1 min-w-0">
+                  <div className="text-[#252B42] font-bold text-[13px] truncate">
+                    {p?.name || "Product"}
+                  </div>
+
+                  <div className="text-[#737373] text-[12px] mt-1">
+                    ${Number(p?.price || 0).toFixed(2)} ×{" "}
+                    <span className="font-bold">{item?.count || 0}</span>
+                  </div>
+
+                  <div className="text-[#23856D] font-bold text-[13px] mt-1">
+                    ${(Number(p?.price || 0) * Number(item?.count || 0)).toFixed(2)}
+                  </div>
+                </div>
+              </div>
+            );
+          })
+        )}
+      </div>
+
+      {/* footer */}
+      <div className="px-4 py-3 border-t border-[#E6E6E6]">
+        <div className="flex items-center justify-between text-[14px]">
+          <span className="text-[#737373]">Total</span>
+          <span className="font-bold text-[#252B42]">
+            ${cartTotal.toFixed(2)}
+          </span>
+        </div>
+
+        <div className="mt-3 flex gap-2">
+          <Link
+            to="/cart"
+            onClick={() => setCartOpen(false)}
+            className="flex-1 h-10 rounded-[6px] border border-[#23A6F0] text-[#23A6F0] font-bold text-[14px] flex items-center justify-center"
+          >
+            View Cart
+          </Link>
+          <Link
+            to="/checkout"
+            onClick={() => setCartOpen(false)}
+            className="flex-1 h-10 rounded-[6px] bg-[#23A6F0] text-white font-bold text-[14px] flex items-center justify-center"
+          >
+            Checkout
+          </Link>
+        </div>
+      </div>
+    </div>
+  )}
+</div>
+
 
             {/* mobile hamburger */}
             <button

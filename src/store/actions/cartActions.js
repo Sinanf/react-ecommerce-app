@@ -1,7 +1,25 @@
-export const SET_CART = "cart/SET_CART";
-export const SET_PAYMENT = "cart/SET_PAYMENT";
-export const SET_ADDRESS = "cart/SET_ADDRESS";
+// src/store/actions/cartActions.js
+export const ADD_TO_CART = "cart/ADD_TO_CART";
+export const TOGGLE_CART_ITEM = "cart/TOGGLE_CART_ITEM";
+export const REMOVE_FROM_CART = "cart/REMOVE_FROM_CART";
+export const SET_CART_OPEN = "cart/SET_CART_OPEN";
 
-export const setCart = (cart) => ({ type: SET_CART, payload: cart });
-export const setPayment = (payment) => ({ type: SET_PAYMENT, payload: payment });
-export const setAddress = (address) => ({ type: SET_ADDRESS, payload: address });
+export const addToCart = (product) => ({
+  type: ADD_TO_CART,
+  payload: product,
+});
+
+export const toggleCartItem = (productId) => ({
+  type: TOGGLE_CART_ITEM,
+  payload: productId,
+});
+
+export const removeFromCart = (productId) => ({
+  type: REMOVE_FROM_CART,
+  payload: productId,
+});
+
+export const setCartOpen = (isOpen) => ({
+  type: SET_CART_OPEN,
+  payload: isOpen,
+});

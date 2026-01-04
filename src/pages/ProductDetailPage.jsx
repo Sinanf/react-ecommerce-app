@@ -3,6 +3,7 @@ import { useEffect, useMemo, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { fetchProductById } from "../store/actions/thunkActions";
+import { addToCart } from "../store/actions/cartActions";
 import ProductCard from "../components/ProductCard";
 
 function Stars({ value = 0 }) {
@@ -191,13 +192,14 @@ function ProductDetailContent({ productId }) {
                   >
                     ♡
                   </button>
-                  <button
-                    type="button"
-                    className="w-11 h-11 rounded-full border border-[#E6E6E6] flex items-center justify-center"
-                    aria-label="Cart"
-                  >
-                    🛒
-                  </button>
+                 <button
+  type="button"
+  onClick={() => product && dispatch(addToCart(product))}
+  className="w-11 h-11 rounded-full border border-[#E6E6E6] flex items-center justify-center"
+  aria-label="Cart"
+>
+  🛒
+</button>
                   <button
                     type="button"
                     className="w-11 h-11 rounded-full border border-[#E6E6E6] flex items-center justify-center"
