@@ -185,3 +185,36 @@ export const fetchProductsByQuery =
     }
   };
 
+  export const fetchProducts = () => async (dispatch, getState) => {
+  try {
+    dispatch(setProductFetchState("FETCHING"));
+
+    const state = getState();
+    const { limit, offset, filter, sort } = state.product;
+
+    const categoryId = state.product?.categoryId; // varsa
+    const params = new URLSearchParams();
+
+    if (categoryId) params.set("category", String(categoryId));
+    if (filter) params.set("filter", filter);
+    if (sort) params.set("sort", sort);
+
+    params.set("limit", String(limit || 25));
+    params.set("offset", String(offset || 0));
+
+    const res = await api.get(`/products?${params.toString()}`);
+    const data = res?.data || {};
+
+    dispatch(setTotal(Number(data.total || 0)));
+    dispatch(setProductList(Array.isArray(data.products) ? data.products : []));
+    dispatch(setProductFetchState("FETCHED"));
+
+    return { ok: true };
+  } catch (err) {
+    dispatch(setProductFetchState("FAILED"));
+    toast.error("Products could not be loaded");
+    console.error("fetchProducts error:", err);
+    return { ok: false };
+  }
+};
+

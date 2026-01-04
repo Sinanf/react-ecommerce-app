@@ -1,14 +1,13 @@
-// src/store/reducers/productReducer.js
 import {
   SET_CATEGORIES,
   SET_FETCH_STATE,
   SET_PRODUCT_FETCH_STATE,
   SET_FILTER,
-  SET_SORT,
   SET_LIMIT,
   SET_OFFSET,
   SET_PRODUCT_LIST,
   SET_TOTAL,
+  SET_SORT,
 } from "../actions/productActions";
 
 const initialState = {
@@ -22,8 +21,8 @@ const initialState = {
   filter: "",
   sort: "",
 
-  fetchState: "NOT_FETCHED",        // categories
-  productFetchState: "NOT_FETCHED", // products
+  fetchState: "NOT_FETCHED",          // categories
+  productFetchState: "NOT_FETCHED",   // products
 };
 
 export default function productReducer(state = initialState, action) {
