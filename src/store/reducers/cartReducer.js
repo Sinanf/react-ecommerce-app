@@ -1,53 +1,71 @@
 // src/store/reducers/cartReducer.js
 import {
   ADD_TO_CART,
-  TOGGLE_CART_ITEM,
-  REMOVE_FROM_CART,
-  SET_CART_OPEN,
+  INCREASE_ITEM,
+  DECREASE_ITEM,
+  REMOVE_ITEM,
+  TOGGLE_ITEM_CHECKED,
 } from "../actions/cartActions";
 
 const initialState = {
-  cart: [], // [{count: 1, checked: true, product: {...}}]
-  isOpen: false, // dropdown kontrolü
+  cart: [],
 };
 
 export default function cartReducer(state = initialState, action) {
   switch (action.type) {
     case ADD_TO_CART: {
       const product = action.payload;
-      if (!product?.id) return state;
+      const idx = state.cart.findIndex((i) => String(i.product.id) === String(product.id));
 
-      const idx = state.cart.findIndex((x) => String(x.product?.id) === String(product.id));
-
-      // aynı ürün varsa count++
       if (idx >= 0) {
-        const next = [...state.cart];
-        next[idx] = { ...next[idx], count: next[idx].count + 1 };
-        return { ...state, cart: next };
+        const updated = state.cart.map((it, i) =>
+          i === idx ? { ...it, count: (it.count || 0) + 1 } : it
+        );
+        return { ...state, cart: updated };
       }
 
-      // yoksa ekle
       return {
         ...state,
-        cart: [{ count: 1, checked: true, product }, ...state.cart],
+        cart: [...state.cart, { product, count: 1, checked: true }],
       };
     }
 
-    case TOGGLE_CART_ITEM: {
+    case INCREASE_ITEM: {
       const id = action.payload;
-      const next = state.cart.map((x) =>
-        String(x.product?.id) === String(id) ? { ...x, checked: !x.checked } : x
-      );
-      return { ...state, cart: next };
+      return {
+        ...state,
+        cart: state.cart.map((it) =>
+          String(it.product.id) === String(id) ? { ...it, count: it.count + 1 } : it
+        ),
+      };
     }
 
-    case REMOVE_FROM_CART: {
+    case DECREASE_ITEM: {
       const id = action.payload;
-      return { ...state, cart: state.cart.filter((x) => String(x.product?.id) !== String(id)) };
+      return {
+        ...state,
+        cart: state.cart.map((it) =>
+          String(it.product.id) === String(id)
+            ? { ...it, count: Math.max(1, it.count - 1) }
+            : it
+        ),
+      };
     }
 
-    case SET_CART_OPEN:
-      return { ...state, isOpen: Boolean(action.payload) };
+    case REMOVE_ITEM: {
+      const id = action.payload;
+      return { ...state, cart: state.cart.filter((it) => String(it.product.id) !== String(id)) };
+    }
+
+    case TOGGLE_ITEM_CHECKED: {
+      const id = action.payload;
+      return {
+        ...state,
+        cart: state.cart.map((it) =>
+          String(it.product.id) === String(id) ? { ...it, checked: !it.checked } : it
+        ),
+      };
+    }
 
     default:
       return state;

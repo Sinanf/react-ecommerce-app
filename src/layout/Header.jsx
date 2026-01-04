@@ -53,11 +53,9 @@ export default function Header() {
 
   const categories = useSelector((s) => s?.product?.categories || []);
 
-    const cart = useSelector((s) => s?.shoppingCart?.cart || []);
+    const cart = useSelector((s) => s?.cart?.cart || []);
+    const cartCount = cart.reduce((acc, i) => acc + (i.count || 0), 0);
 
-  const cartCount = useMemo(() => {
-    return cart.reduce((sum, item) => sum + (Number(item?.count) || 0), 0);
-  }, [cart]);
 
   const cartTotal = useMemo(() => {
     return cart.reduce((sum, item) => {
@@ -422,12 +420,14 @@ export default function Header() {
 
         <div className="mt-3 flex gap-2">
           <Link
-            to="/cart"
-            onClick={() => setCartOpen(false)}
-            className="flex-1 h-10 rounded-[6px] border border-[#23A6F0] text-[#23A6F0] font-bold text-[14px] flex items-center justify-center"
-          >
-            View Cart
-          </Link>
+  to="/cart"
+  className="p-1 flex flex-row items-center gap-1"
+  aria-label="Cart"
+>
+  <ShoppingCart className="w-5 h-5 text-[#23A6F0]" />
+  <span className="hidden md:inline text-[12px] text-[#23A6F0]">{cartCount}</span>
+</Link>
+
           <Link
             to="/checkout"
             onClick={() => setCartOpen(false)}

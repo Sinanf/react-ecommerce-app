@@ -1,25 +1,12 @@
 // src/store/actions/cartActions.js
 export const ADD_TO_CART = "cart/ADD_TO_CART";
-export const TOGGLE_CART_ITEM = "cart/TOGGLE_CART_ITEM";
-export const REMOVE_FROM_CART = "cart/REMOVE_FROM_CART";
-export const SET_CART_OPEN = "cart/SET_CART_OPEN";
+export const INCREASE_ITEM = "cart/INCREASE_ITEM";
+export const DECREASE_ITEM = "cart/DECREASE_ITEM";
+export const REMOVE_ITEM = "cart/REMOVE_ITEM";
+export const TOGGLE_ITEM_CHECKED = "cart/TOGGLE_ITEM_CHECKED";
 
-export const addToCart = (product) => ({
-  type: ADD_TO_CART,
-  payload: product,
-});
-
-export const toggleCartItem = (productId) => ({
-  type: TOGGLE_CART_ITEM,
-  payload: productId,
-});
-
-export const removeFromCart = (productId) => ({
-  type: REMOVE_FROM_CART,
-  payload: productId,
-});
-
-export const setCartOpen = (isOpen) => ({
-  type: SET_CART_OPEN,
-  payload: isOpen,
-});
+export const addToCart = (product) => ({ type: ADD_TO_CART, payload: product });
+export const increaseItem = (productId) => ({ type: INCREASE_ITEM, payload: productId });
+export const decreaseItem = (productId) => ({ type: DECREASE_ITEM, payload: productId });
+export const removeItem = (productId) => ({ type: REMOVE_ITEM, payload: productId });
+export const toggleItemChecked = (productId) => ({ type: TOGGLE_ITEM_CHECKED, payload: productId });

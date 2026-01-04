@@ -13,6 +13,7 @@ import TeamPage from "../pages/TeamPage";
 import SignUpPage from "../pages/SignUpPage";
 import LoginPage from "../pages/LoginPage";
 import ProductDetailPage from "../pages/ProductDetailPage";
+import CartPage from "../pages/CartPage";
 
 export default function AppRouter() {
   return (
@@ -21,6 +22,8 @@ export default function AppRouter() {
 
       <Route path="/shop" element={<ShopPage />} />
       <Route path="/shop/:gender/:categoryName/:categoryId" element={<ShopPage />} />
+
+      <Route path="/cart" element={<CartPage />} />
 
 
       <Route path="/signup" element={<SignUpPage />} />
