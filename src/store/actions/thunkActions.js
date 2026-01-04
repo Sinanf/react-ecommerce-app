@@ -4,7 +4,7 @@ import { toast } from "react-toastify";
 import md5 from "blueimp-md5";
 import { api, setAuthToken, clearAuthToken } from "../../api/api";
 import { setUser, setRoles } from "./clientActions";
-import { setCategories, setFetchState, setProductList, setTotal, setProductFetchState } from "./productActions";
+import { setCategories, setFetchState, setProductList, setTotal, setProductFetchState, setProduct } from "./productActions";
 
 /* --------------------------------------------------
    Helpers
@@ -214,6 +214,24 @@ export const fetchProductsByQuery =
     dispatch(setProductFetchState("FAILED"));
     toast.error("Products could not be loaded");
     console.error("fetchProducts error:", err);
+    return { ok: false };
+  }
+};
+
+// ✅ T16
+export const fetchProductById = (productId) => async (dispatch) => {
+  if (!productId) return { ok: false };
+
+  try {
+    dispatch(setProductFetchState("FETCHING"));
+    const res = await api.get(`/products/${productId}`);
+    dispatch(setProduct(res.data));
+    dispatch(setProductFetchState("FETCHED"));
+    return { ok: true };
+  } catch (err) {
+    dispatch(setProductFetchState("FAILED"));
+    toast.error("Product could not be loaded");
+    console.error("fetchProductById error:", err);
     return { ok: false };
   }
 };

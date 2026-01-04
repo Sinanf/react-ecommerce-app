@@ -12,6 +12,7 @@ import NotFoundPage from "../pages/NotFoundPage";
 import TeamPage from "../pages/TeamPage";
 import SignUpPage from "../pages/SignUpPage";
 import LoginPage from "../pages/LoginPage";
+import ProductDetailPage from "../pages/ProductDetailPage";
 
 export default function AppRouter() {
   return (
@@ -27,6 +28,10 @@ export default function AppRouter() {
 
       <Route path="/product" element={<ProductPage />} />
       <Route path="/product/:id" element={<ProductPage />} />
+      <Route
+  path="/shop/:gender/:categoryName/:categoryId/:productNameSlug/:productId"
+  element={<ProductDetailPage />}
+/>
 
       <Route path="/pricing" element={<PricingPage />} />
       <Route path="/contact" element={<ContactPage />} />

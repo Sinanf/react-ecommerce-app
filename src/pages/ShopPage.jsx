@@ -293,21 +293,30 @@ useEffect(() => {
           ) : (
             <div className="flex flex-row flex-wrap justify-center gap-6">
               {productList.map((p) => {
-                const firstImg = p?.images?.[0]?.url;
+  const firstImg = p?.images?.[0]?.url;
 
-                return (
-                  <div key={p.id} className="w-full md:w-[calc(25%-18px)] flex">
-                    <ProductCard
-                      id={p.id}
-                      img={firstImg || "https://picsum.photos/800/900?random=1"}
-                      title={p.name}
-                      department="English Department"
-                      priceOld={`$${(Number(p.price) * 1.25).toFixed(2)}`}
-                      priceNew={`$${Number(p.price).toFixed(2)}`}
-                    />
-                  </div>
-                );
-              })}
+  const cat = categories.find((c) => Number(c.id) === Number(p.category_id));
+  const gender = genderPath(cat?.gender);
+  const categoryName = slugifyTr(cat?.code?.split(":")?.[1] || cat?.title || "kategori");
+  const productNameSlug = slugifyTr(p?.name || "urun");
+
+  const to = `/shop/${gender}/${categoryName}/${p.category_id}/${productNameSlug}/${p.id}`;
+
+  return (
+    <div key={p.id} className="w-full md:w-[calc(25%-18px)] flex">
+      <ProductCard
+        id={p.id}
+        to={to}
+        img={firstImg || "https://picsum.photos/800/900?random=1"}
+        title={p.name}
+        department="English Department"
+        priceOld={`$${(Number(p.price) * 1.25).toFixed(2)}`}
+        priceNew={`$${Number(p.price).toFixed(2)}`}
+      />
+    </div>
+  );
+})}
+
             </div>
           )}
         </div>
