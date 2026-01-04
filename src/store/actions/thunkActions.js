@@ -143,31 +143,45 @@ export const fetchCategoriesIfNeeded = () => async (dispatch, getState) => {
   }
 };
 
-/* --------------------------------------------------
-   PRODUCTS (T13)
--------------------------------------------------- */
-export const fetchProducts = () => async (dispatch) => {
-  try {
-    dispatch(setProductFetchState("FETCHING"));
+// Parametreli versiyon (T14 için önerilen):
+export const fetchProductsByQuery =
+  ({ categoryId } = {}) =>
+  async (dispatch, getState) => {
+    try {
+      dispatch(setProductFetchState("FETCHING"));
 
-    // İstersen buraya query param ekleriz (limit/offset/filter/categoryId)
-    // şimdilik base endpoint:
-    const res = await api.get("/products");
+      const st = getState()?.product || {};
+      const { filter, sort, limit, offset } = st;
 
-    const data = res?.data || {};
-    const total = Number(data?.total || 0);
-    const products = Array.isArray(data?.products) ? data.products : [];
+      const params = new URLSearchParams();
 
-    dispatch(setTotal(total));
-    dispatch(setProductList(products));
+      if (categoryId) params.set("category", String(categoryId));
+      if (filter) params.set("filter", String(filter));
+      if (sort) params.set("sort", String(sort));
 
-    dispatch(setProductFetchState("FETCHED"));
-    return { ok: true };
-  } catch (err) {
-    dispatch(setProductFetchState("FAILED"));
-    toast.error("Products could not be loaded");
-    console.error("fetchProducts error:", err);
-    return { ok: false };
-  }
-};
+      // limit/offset kullanacaksan (opsiyonel)
+      if (limit != null) params.set("limit", String(limit));
+      if (offset != null) params.set("offset", String(offset));
+
+      const qs = params.toString();
+      const url = qs ? `/products?${qs}` : "/products";
+
+      const res = await api.get(url);
+
+      const data = res?.data || {};
+      const total = Number(data?.total || 0);
+      const products = Array.isArray(data?.products) ? data.products : [];
+
+      dispatch(setTotal(total));
+      dispatch(setProductList(products));
+
+      dispatch(setProductFetchState("FETCHED"));
+      return { ok: true };
+    } catch (err) {
+      dispatch(setProductFetchState("FAILED"));
+      toast.error("Products could not be loaded");
+      console.error("fetchProductsByQuery error:", err);
+      return { ok: false };
+    }
+  };
 

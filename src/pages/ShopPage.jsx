@@ -1,45 +1,57 @@
 // src/pages/ShopPage.jsx
-import { useEffect } from "react";
-import { Link } from "react-router-dom";
+import { useEffect, useState } from "react";
+import { Link, useParams } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 
 import ProductCard from "../components/ProductCard";
-import { fetchCategoriesIfNeeded, fetchProducts } from "../store/actions/thunkActions";
-
-// TR slug helper (ayakkabı -> ayakkabi)
-const slugifyTr = (text = "") =>
-  String(text)
-    .toLowerCase()
-    .trim()
-    .replaceAll("ç", "c")
-    .replaceAll("ğ", "g")
-    .replaceAll("ı", "i")
-    .replaceAll("ö", "o")
-    .replaceAll("ş", "s")
-    .replaceAll("ü", "u")
-    .replace(/\s+/g, "-");
-
-const genderPath = (g) => (g === "k" ? "kadin" : g === "e" ? "erkek" : "unisex");
+import { fetchCategoriesIfNeeded, fetchProductsByQuery } from "../store/actions/thunkActions";
+import { setFilter, setSort } from "../store/actions/productActions";
 
 export default function ShopPage() {
   const dispatch = useDispatch();
+  const { categoryId } = useParams(); // /shop/:gender/:categoryName/:categoryId
 
   // categories (T12)
   const categories = useSelector((s) => s?.product?.categories || []);
   const categoryFetchState = useSelector((s) => s?.product?.fetchState);
 
-  // products (T13)
+  // products (T13/T14)
   const productList = useSelector((s) => s?.product?.productList || []);
   const total = useSelector((s) => s?.product?.total || 0);
   const productFetchState = useSelector((s) => s?.product?.productFetchState);
 
+  // query states
+  const filter = useSelector((s) => s?.product?.filter || "");
+  const sort = useSelector((s) => s?.product?.sort || "");
+
+  // UI controlled states
+  const [filterInput, setFilterInput] = useState(filter);
+  const [sortDraft, setSortDraft] = useState(sort);
+
   useEffect(() => {
     dispatch(fetchCategoriesIfNeeded());
-    dispatch(fetchProducts());
   }, [dispatch]);
 
-  const isLoadingProducts = productFetchState === "FETCHING";
+  // filter input -> store filter (debounce)
+  useEffect(() => {
+    const t = setTimeout(() => {
+      dispatch(setFilter(filterInput));
+    }, 400);
+    return () => clearTimeout(t);
+  }, [dispatch, filterInput]);
+
+  // categoryId OR filter OR sort change => refetch (keep others)
+  useEffect(() => {
+    dispatch(fetchProductsByQuery({ categoryId }));
+  }, [dispatch, categoryId, filter, sort]);
+
   const isLoadingCategories = categoryFetchState === "FETCHING" && categories.length === 0;
+  const isLoadingProducts = productFetchState === "FETCHING";
+
+  const onClickFilterButton = () => {
+    // sort sadece burada state’e yazılıyor (requirement)
+    dispatch(setSort(sortDraft));
+  };
 
   return (
     <div className="w-full flex flex-col bg-white">
@@ -71,29 +83,31 @@ export default function ShopPage() {
             <div className="text-[#737373] text-[14px] py-6">No categories found.</div>
           ) : (
             <div className="w-full flex flex-row gap-4 overflow-x-auto md:overflow-visible">
-              {categories.map((c) => {
-                const gender = genderPath(c.gender);
-                const categoryName = slugifyTr(c.code?.split(":")?.[1] || c.title);
-                const to = `/shop/${gender}/${categoryName}/${c.id}`;
-
-                return (
-                  <Link
-                    key={c.id}
-                    to={to}
-                    className="shrink-0 w-[240px] h-[240px] md:w-[210px] md:h-[210px] relative flex"
-                  >
-                    <img src={c.img} alt={c.title} className="w-full h-full object-cover" />
-                    <div className="absolute inset-0 flex flex-col items-center justify-center">
-                      <div className="font-bold text-[16px] leading-[24px] tracking-[0.1px] text-white">
-                        {c.title}
-                      </div>
-                      <div className="text-[14px] leading-[24px] tracking-[0.2px] text-white">
-                        Rating: {c.rating}
-                      </div>
+              {categories.map((c) => (
+                <Link
+                  key={c.id}
+                  to={`/shop/${c.gender === "k" ? "kadin" : "erkek"}/${String(c.code?.split(":")?.[1] || c.title)
+                    .toLowerCase()
+                    .replaceAll("ç", "c")
+                    .replaceAll("ğ", "g")
+                    .replaceAll("ı", "i")
+                    .replaceAll("ö", "o")
+                    .replaceAll("ş", "s")
+                    .replaceAll("ü", "u")
+                    .replace(/\s+/g, "-")}/${c.id}`}
+                  className="shrink-0 w-[240px] h-[240px] md:w-[210px] md:h-[210px] relative flex"
+                >
+                  <img src={c.img} alt={c.title} className="w-full h-full object-cover" />
+                  <div className="absolute inset-0 flex flex-col items-center justify-center">
+                    <div className="font-bold text-[16px] leading-[24px] tracking-[0.1px] text-white">
+                      {c.title}
                     </div>
-                  </Link>
-                );
-              })}
+                    <div className="text-[14px] leading-[24px] tracking-[0.2px] text-white">
+                      Rating: {c.rating}
+                    </div>
+                  </div>
+                </Link>
+              ))}
             </div>
           )}
         </div>
@@ -107,30 +121,34 @@ export default function ShopPage() {
           </div>
 
           <div className="flex flex-col gap-3 md:flex-row md:items-center md:gap-4">
-            <div className="flex flex-row items-center gap-2">
-              <div className="text-[14px] leading-[24px] tracking-[0.2px] text-[#737373]">
-                Views:
-              </div>
-              <button type="button" className="w-10 h-10 border border-[#E6E6E6] flex items-center justify-center">
-                ▦
-              </button>
-              <button type="button" className="w-10 h-10 border border-[#E6E6E6] flex items-center justify-center">
-                ≡
-              </button>
-            </div>
+            {/* filter input */}
+            <input
+              value={filterInput}
+              onChange={(e) => setFilterInput(e.target.value)}
+              placeholder="Search..."
+              className="h-10 px-4 border border-[#E6E6E6] text-[14px] text-[#737373] bg-white"
+            />
 
-            <div className="flex flex-row items-center gap-3">
-              <select className="h-10 px-4 border border-[#E6E6E6] text-[14px] text-[#737373] bg-white">
-                <option>Popularity</option>
-                <option>Newest</option>
-                <option>Price: Low to High</option>
-                <option>Price: High to Low</option>
-              </select>
+            {/* sort */}
+            <select
+              value={sortDraft}
+              onChange={(e) => setSortDraft(e.target.value)}
+              className="h-10 px-4 border border-[#E6E6E6] text-[14px] text-[#737373] bg-white"
+            >
+              <option value="">Sort</option>
+              <option value="price:asc">price:asc</option>
+              <option value="price:desc">price:desc</option>
+              <option value="rating:asc">rating:asc</option>
+              <option value="rating:desc">rating:desc</option>
+            </select>
 
-              <button type="button" className="h-10 px-6 bg-[#23A6F0] text-white font-bold text-[14px] rounded-[5px]">
-                Filter
-              </button>
-            </div>
+            <button
+              type="button"
+              onClick={onClickFilterButton}
+              className="h-10 px-6 bg-[#23A6F0] text-white font-bold text-[14px] rounded-[5px]"
+            >
+              Filter
+            </button>
           </div>
         </div>
       </section>
@@ -146,7 +164,6 @@ export default function ShopPage() {
             <div className="flex flex-row flex-wrap justify-center gap-6">
               {productList.map((p) => {
                 const firstImg = p?.images?.[0]?.url;
-
                 return (
                   <div key={p.id} className="w-full md:w-[calc(25%-18px)] flex">
                     <ProductCard
@@ -154,7 +171,7 @@ export default function ShopPage() {
                       img={firstImg || "https://picsum.photos/800/900?random=1"}
                       title={p.name}
                       department="English Department"
-                      priceOld={`$${(p.price * 1.25).toFixed(2)}`}
+                      priceOld={`$${(Number(p.price) * 1.25).toFixed(2)}`}
                       priceNew={`$${Number(p.price).toFixed(2)}`}
                     />
                   </div>
