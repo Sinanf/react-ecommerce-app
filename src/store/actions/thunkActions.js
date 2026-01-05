@@ -3,7 +3,7 @@
 import { toast } from "react-toastify";
 import md5 from "blueimp-md5";
 import { api, setAuthToken, clearAuthToken } from "../../api/api";
-import { setUser, setRoles, setAddressList, setCardList } from "./clientActions"; // ✅ T21: setCardList eklendi
+import { setUser, setRoles, setAddressList, setCardList, setOrders, setOrdersFetchState  } from "./clientActions"; // ✅ T21: setCardList eklendi
 import {
   setCategories,
   setFetchState,
@@ -402,3 +402,23 @@ export const createOrder = (payload) => async () => {
   }
 };
 
+// ✅ T23 — GET /order
+export const fetchOrders = () => async (dispatch) => {
+  try {
+    dispatch(setOrdersFetchState("FETCHING"));
+    const res = await api.get("/order");
+
+    // API bazen {orders:[...]} veya direkt [...] dönebilir → defensive
+    const data = res?.data;
+    const list = Array.isArray(data) ? data : Array.isArray(data?.orders) ? data.orders : [];
+
+    dispatch(setOrders(list));
+    dispatch(setOrdersFetchState("FETCHED"));
+    return { ok: true, list };
+  } catch (err) {
+    dispatch(setOrdersFetchState("FAILED"));
+    toast.error(err?.response?.data?.message || "Orders could not be loaded");
+    console.error("fetchOrders error:", err);
+    return { ok: false, error: err };
+  }
+};

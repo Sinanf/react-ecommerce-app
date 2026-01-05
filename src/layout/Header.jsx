@@ -13,7 +13,7 @@ import {
   Twitter,
   ChevronDown,
 } from "lucide-react";
-import { Link, NavLink, useLocation } from "react-router-dom";
+import { Link, NavLink, useLocation, useNavigate } from "react-router-dom";
 import { useSelector, useDispatch } from "react-redux";
 import { logoutUser, fetchCategoriesIfNeeded } from "../store/actions/thunkActions";
 
@@ -44,6 +44,29 @@ const getCategorySlug = (c) => {
 };
 
 export default function Header() {
+
+  const navigate = useNavigate();
+const [userMenuOpen, setUserMenuOpen] = useState(false);
+const userMenuRef = useRef(null);
+
+useEffect(() => {
+  if (!userMenuOpen) return;
+
+  const onDown = (e) => {
+    const el = userMenuRef.current;
+    if (!el) return;
+    if (!el.contains(e.target)) setUserMenuOpen(false);
+  };
+
+  document.addEventListener("mousedown", onDown);
+  document.addEventListener("touchstart", onDown);
+  return () => {
+    document.removeEventListener("mousedown", onDown);
+    document.removeEventListener("touchstart", onDown);
+  };
+}, [userMenuOpen]);
+
+
   const location = useLocation();
   const dispatch = useDispatch();
 
@@ -330,50 +353,82 @@ export default function Header() {
 
           <div className="flex flex-row items-center gap-4">
             {isLoggedIn ? (
-              <div className="hidden md:flex items-center gap-3 text-[14px] text-[#252B42]">
-                {user?.gravatarUrl ? (
-                  <img
-                    src={user.gravatarUrl}
-                    alt="avatar"
-                    className="w-8 h-8 rounded-full border border-[#E6E6E6]"
-                    referrerPolicy="no-referrer"
-                  />
-                ) : (
-                  <div className="w-8 h-8 rounded-full bg-[#E6E6E6]" />
-                )}
+  <div
+    className="hidden md:flex items-center gap-3 text-[14px] text-[#252B42] relative"
+    ref={userMenuRef}
+  >
+    {user?.gravatarUrl ? (
+      <img
+        src={user.gravatarUrl}
+        alt="avatar"
+        className="w-8 h-8 rounded-full border border-[#E6E6E6]"
+        referrerPolicy="no-referrer"
+      />
+    ) : (
+      <div className="w-8 h-8 rounded-full bg-[#E6E6E6]" />
+    )}
 
-                <span className="font-bold">{user?.name || user?.email}</span>
+    <button
+      type="button"
+      onClick={() => setUserMenuOpen((v) => !v)}
+      className="flex items-center gap-2 font-bold"
+    >
+      <span className="max-w-[160px] truncate">{user?.name || user?.email}</span>
+      <ChevronDown className="w-4 h-4" />
+    </button>
 
-                <button
-                  type="button"
-                  onClick={() => dispatch(logoutUser())}
-                  className="text-[#23A6F0] font-bold"
-                >
-                  Logout
-                </button>
-              </div>
-            ) : (
-              <div className="hidden md:flex items-center gap-2 text-[14px] leading-[24px] tracking-[0.2px] text-[#23A6F0]">
-                <Settings className="w-4 h-4" />
-                <Link
-                  to="/login"
-                  state={{ from: location }}
-                  className="font-bold hover:underline underline-offset-4"
-                  onClick={() => setCartOpen(false)}
-                >
-                  Login
-                </Link>
-                <span>/</span>
-                <Link
-                  to="/signup"
-                  state={{ from: location }}
-                  className="font-bold hover:underline underline-offset-4"
-                  onClick={() => setCartOpen(false)}
-                >
-                  Register
-                </Link>
-              </div>
-            )}
+    {userMenuOpen && (
+      <div className="absolute right-0 top-full mt-3 w-[200px] bg-white border border-[#E6E6E6] rounded-[10px] shadow-lg z-50 overflow-hidden">
+        <button
+          type="button"
+          onClick={() => {
+            setUserMenuOpen(false);
+            setCartOpen(false);
+            navigate("/orders");
+          }}
+          className="w-full text-left px-4 py-3 text-[14px] text-[#252B42] hover:bg-[#FAFAFA] font-bold"
+        >
+          Previous Orders
+        </button>
+
+        <div className="h-px bg-[#E6E6E6]" />
+
+        <button
+          type="button"
+          onClick={() => {
+            setUserMenuOpen(false);
+            dispatch(logoutUser());
+          }}
+          className="w-full text-left px-4 py-3 text-[14px] text-[#23A6F0] hover:bg-[#FAFAFA] font-bold"
+        >
+          Logout
+        </button>
+      </div>
+    )}
+  </div>
+) : (
+  <div className="hidden md:flex items-center gap-2 text-[14px] leading-[24px] tracking-[0.2px] text-[#23A6F0]">
+    <Settings className="w-4 h-4" />
+    <Link
+      to="/login"
+      state={{ from: location }}
+      className="font-bold hover:underline underline-offset-4"
+      onClick={() => setCartOpen(false)}
+    >
+      Login
+    </Link>
+    <span>/</span>
+    <Link
+      to="/signup"
+      state={{ from: location }}
+      className="font-bold hover:underline underline-offset-4"
+      onClick={() => setCartOpen(false)}
+    >
+      Register
+    </Link>
+  </div>
+)}
+
 
             <button className="p-1" aria-label="Search">
               <Search className="w-5 h-5 text-[#23A6F0]" />
@@ -562,6 +617,17 @@ export default function Header() {
               <div className="text-[18px] text-[#252B42] font-bold">
                 {user?.name || user?.email}
               </div>
+              <NavLink
+  to="/orders"
+  onClick={() => {
+    closeMenu();
+    setCartOpen(false);
+  }}
+  className={navBaseMobile}
+>
+  Previous Orders
+</NavLink>
+
               <button
                 type="button"
                 onClick={() => {

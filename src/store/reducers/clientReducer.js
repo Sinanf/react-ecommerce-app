@@ -5,13 +5,17 @@ import {
   SET_THEME,
   SET_USER,
   SET_ADDRESS_LIST,
-  SET_CARD_LIST, // ✅ T21
+  SET_CARD_LIST, 
+  SET_ORDERS,
+  SET_ORDERS_FETCH_STATE,
 } from "../actions/clientActions";
 
 const initialState = {
   user: {},
   addressList: [],
-  creditCards: [], // ✅ saved cards
+  creditCards: [], 
+  orders: [],
+  ordersFetchState: "NOT_FETCHED",
   roles: [],
   theme: "light",
   language: "en",
@@ -38,7 +42,15 @@ export default function clientReducer(state = initialState, action) {
     case SET_CARD_LIST:
       return { ...state, creditCards: action.payload };
 
+    case SET_ORDERS:
+      return { ...state, orders: action.payload };
+
+    case SET_ORDERS_FETCH_STATE:
+      return { ...state, ordersFetchState: action.payload };
+
     default:
       return state;
   }
 }
+
+

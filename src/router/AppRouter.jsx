@@ -21,6 +21,9 @@ import CreateOrderAddressPage from "../pages/CreateOrderAddressPage";
 // ✅ T21 - Step 2
 import CreateOrderPaymentPage from "../pages/CreateOrderPaymentPage";
 
+import PreviousOrdersPage from "../pages/PreviousOrdersPage";
+
+
 export default function AppRouter() {
   return (
     <Routes>
@@ -50,6 +53,16 @@ export default function AppRouter() {
           </RequireAuth>
         }
       />
+
+      <Route
+        path="/orders"
+        element={
+          <RequireAuth>
+            <PreviousOrdersPage />
+          </RequireAuth>
+        }
+      />
+
 
       <Route path="/signup" element={<SignUpPage />} />
       <Route path="/login" element={<LoginPage />} />

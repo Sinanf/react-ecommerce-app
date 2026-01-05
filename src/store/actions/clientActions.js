@@ -9,6 +9,10 @@ export const SET_ADDRESS_LIST = "client/SET_ADDRESS_LIST";
 // ✅ T21
 export const SET_CARD_LIST = "client/SET_CARD_LIST";
 
+// ✅ T23
+export const SET_ORDERS = "client/SET_ORDERS";
+export const SET_ORDERS_FETCH_STATE = "client/SET_ORDERS_FETCH_STATE";
+
 export const setUser = (user) => ({ type: SET_USER, payload: user });
 export const setRoles = (roles) => ({ type: SET_ROLES, payload: roles });
 export const setTheme = (theme) => ({ type: SET_THEME, payload: theme });
@@ -17,3 +21,8 @@ export const setAddressList = (list) => ({ type: SET_ADDRESS_LIST, payload: list
 
 // ✅ T21
 export const setCardList = (list) => ({ type: SET_CARD_LIST, payload: list });
+
+
+// ✅ T23
+export const setOrders = (list) => ({ type: SET_ORDERS, payload: list });
+export const setOrdersFetchState = (state) => ({ type: SET_ORDERS_FETCH_STATE, payload: state });
