@@ -33,6 +33,7 @@ export const loginUser =
 
       const data = res?.data || {};
       const token = data?.token;
+
       const user = {
         ...data,
         email: data?.email || email,
@@ -41,9 +42,16 @@ export const loginUser =
 
       dispatch(setUser(user));
 
-      if (rememberMe && token) {
-        localStorage.setItem("token", token);
+      // ✅ HER DURUMDA header'a yaz
+      if (token) {
         setAuthToken(token);
+
+        // ✅ rememberMe true -> localStorage, false -> sessionStorage
+        const storage = rememberMe ? localStorage : sessionStorage;
+        storage.setItem("token", token);
+
+        // diğer storage'dan varsa temizle (karışmasın)
+        (rememberMe ? sessionStorage : localStorage).removeItem("token");
       }
 
       toast.success("Login successful");
@@ -57,11 +65,13 @@ export const loginUser =
     }
   };
 
+
 /* --------------------------------------------------
    AUTO LOGIN (T11)
 -------------------------------------------------- */
 export const verifyToken = () => async (dispatch) => {
-  const token = localStorage.getItem("token");
+  const token =
+    localStorage.getItem("token") || sessionStorage.getItem("token");
 
   if (!token) {
     clearAuthToken();
@@ -83,12 +93,16 @@ export const verifyToken = () => async (dispatch) => {
 
     dispatch(setUser(user));
 
-    localStorage.setItem("token", newToken);
+    // ✅ token yenilendiyse, hangi storage'da varsa oraya yaz
+    if (localStorage.getItem("token")) localStorage.setItem("token", newToken);
+    else sessionStorage.setItem("token", newToken);
+
     setAuthToken(newToken);
 
     return { ok: true };
   } catch (err) {
     localStorage.removeItem("token");
+    sessionStorage.removeItem("token");
     clearAuthToken();
     dispatch(setUser({}));
 
@@ -97,14 +111,17 @@ export const verifyToken = () => async (dispatch) => {
   }
 };
 
+
 /* --------------------------------------------------
    LOGOUT
 -------------------------------------------------- */
 export const logoutUser = () => (dispatch) => {
   localStorage.removeItem("token");
+  sessionStorage.removeItem("token");
   clearAuthToken();
   dispatch(setUser({}));
 };
+
 
 /* --------------------------------------------------
    ROLES (Signup için)
@@ -351,3 +368,37 @@ export const deleteCard = (cardId) => async (dispatch) => {
     return { ok: false };
   }
 };
+
+/* --------------------------------------------------
+   T22 — CREATE ORDER
+   POST /order
+-------------------------------------------------- */
+export const createOrder = (payload) => async () => {
+  try {
+    // payload örneği taskte verilen yapıda olmalı
+    // {
+    //   address_id,
+    //   order_date,
+    //   card_no,
+    //   card_name,
+    //   card_expire_month,
+    //   card_expire_year,
+    //   card_ccv,
+    //   price,
+    //   products: [{ product_id, count, detail }]
+    // }
+
+    const res = await api.post("/order", payload);
+
+    toast.success("🎉 Congrats! Your order has been created successfully.");
+    return { ok: true, data: res?.data };
+  } catch (err) {
+    toast.error(
+      err?.response?.data?.message ||
+        "Order could not be created. Please try again."
+    );
+    console.error("createOrder error:", err);
+    return { ok: false, error: err };
+  }
+};
+

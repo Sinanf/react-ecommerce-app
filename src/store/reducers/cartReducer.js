@@ -5,6 +5,7 @@ import {
   DECREASE_ITEM,
   REMOVE_ITEM,
   TOGGLE_ITEM_CHECKED,
+  CLEAR_CART,
 } from "../actions/cartActions";
 
 const initialState = {
@@ -13,9 +14,15 @@ const initialState = {
 
 export default function cartReducer(state = initialState, action) {
   switch (action.type) {
+    // ✅ T22: order sonrası sepeti sıfırla
+    case CLEAR_CART:
+  return { ...state, cart: [] };
+
     case ADD_TO_CART: {
       const product = action.payload;
-      const idx = state.cart.findIndex((i) => String(i.product.id) === String(product.id));
+      const idx = state.cart.findIndex(
+        (i) => String(i.product.id) === String(product.id)
+      );
 
       if (idx >= 0) {
         const updated = state.cart.map((it, i) =>
@@ -35,7 +42,9 @@ export default function cartReducer(state = initialState, action) {
       return {
         ...state,
         cart: state.cart.map((it) =>
-          String(it.product.id) === String(id) ? { ...it, count: it.count + 1 } : it
+          String(it.product.id) === String(id)
+            ? { ...it, count: it.count + 1 }
+            : it
         ),
       };
     }
@@ -54,7 +63,10 @@ export default function cartReducer(state = initialState, action) {
 
     case REMOVE_ITEM: {
       const id = action.payload;
-      return { ...state, cart: state.cart.filter((it) => String(it.product.id) !== String(id)) };
+      return {
+        ...state,
+        cart: state.cart.filter((it) => String(it.product.id) !== String(id)),
+      };
     }
 
     case TOGGLE_ITEM_CHECKED: {
@@ -62,7 +74,9 @@ export default function cartReducer(state = initialState, action) {
       return {
         ...state,
         cart: state.cart.map((it) =>
-          String(it.product.id) === String(id) ? { ...it, checked: !it.checked } : it
+          String(it.product.id) === String(id)
+            ? { ...it, checked: !it.checked }
+            : it
         ),
       };
     }

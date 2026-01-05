@@ -7,6 +7,7 @@ import {
   updateAddress,
   deleteAddress,
 } from "../store/actions/thunkActions";
+import { useNavigate } from "react-router-dom";
 
 const CITIES = [
   "istanbul",
@@ -33,6 +34,7 @@ const emptyForm = {
 };
 
 export default function CreateOrderAddressPage() {
+  const navigate = useNavigate();
   const dispatch = useDispatch();
 
   const addressList = useSelector((s) => s?.client?.addressList || []);
@@ -182,12 +184,22 @@ export default function CreateOrderAddressPage() {
 
           <div className="md:flex md:justify-end">
             <button
-              type="button"
-              className="w-full md:w-auto h-11 px-8 bg-[#E77C40] text-white font-bold rounded-[8px]"
-              disabled
-            >
-              Save & Continue
-            </button>
+  type="button"
+  className="w-full md:w-auto h-11 px-8 bg-[#E77C40] text-white font-bold rounded-[8px] disabled:opacity-50"
+  disabled={!canProceed}
+  onClick={() =>
+  navigate("/order/payment", {
+    state: {
+      shippingId: effectiveShippingId,
+      billingId: effectiveBillingId,
+      sameAsShipping,
+    },
+  })
+}
+>
+  Save & Continue
+</button>
+
           </div>
         </div>
 
@@ -495,12 +507,14 @@ export default function CreateOrderAddressPage() {
               </div>
 
               <button
-                type="button"
-                className="mt-6 w-full h-11 bg-[#E77C40] text-white font-bold rounded-[8px] disabled:opacity-50"
-                disabled={!canProceed}
-              >
-                Create Order
-              </button>
+  type="button"
+  className="mt-6 w-full h-11 bg-[#E77C40] text-white font-bold rounded-[8px] disabled:opacity-50"
+  disabled={!canProceed}
+  onClick={() => navigate("/order/payment")}
+>
+  Create Order
+</button>
+
 
               <div className="mt-3 text-[12px] text-[#BDBDBD]">
                 (Button functionality next tasks)
