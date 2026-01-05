@@ -14,9 +14,8 @@ const initialState = {
 
 export default function cartReducer(state = initialState, action) {
   switch (action.type) {
-    // ✅ T22: order sonrası sepeti sıfırla
     case CLEAR_CART:
-  return { ...state, cart: [] };
+      return { ...state, cart: [] };
 
     case ADD_TO_CART: {
       const product = action.payload;
