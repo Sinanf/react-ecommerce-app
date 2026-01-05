@@ -1,9 +1,8 @@
 // src/pages/CartPage.jsx
 import { useMemo } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { Link } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 
-// actions isimleri sende farklı olabilir -> aşağıdaki importu kendi cartActions.js'ine göre güncelle
 import {
   increaseItem,
   decreaseItem,
@@ -13,6 +12,9 @@ import {
 
 export default function CartPage() {
   const dispatch = useDispatch();
+  const navigate = useNavigate();
+  const location = useLocation();
+
   const cart = useSelector((s) => s?.cart?.cart || []);
 
   const summary = useMemo(() => {
@@ -33,8 +35,24 @@ export default function CartPage() {
 
     const totalCount = checkedItems.reduce((acc, i) => acc + (i.count || 0), 0);
 
-    return { totalCount, productsTotal, shipping, discount, grandTotal };
+    return {
+      checkedCount: checkedItems.length,
+      totalCount,
+      productsTotal,
+      shipping,
+      discount,
+      grandTotal,
+    };
   }, [cart]);
+
+  const canCreateOrder = summary.checkedCount > 0;
+
+  const goToCheckoutAddress = () => {
+    if (!canCreateOrder) return;
+    // RequireAuth route’un var: /order/create
+    // Login'e düşerse RequireAuth zaten state kullanabilir diye from veriyoruz
+    navigate("/order/create", { state: { from: location } });
+  };
 
   if (!cart.length) {
     return (
@@ -202,37 +220,33 @@ export default function CartPage() {
               })}
             </div>
 
-            {/* footer total (mobile için de güzel duruyor, kalsın) */}
+            {/* footer total */}
             <div className="bg-[#FAFAFA] border-t border-[#E6E6E6] px-4 py-4 flex items-center justify-between">
               <div className="text-[#737373] text-[14px]">
                 Selected items:{" "}
-                <span className="font-bold text-[#252B42]">
-                  {summary.totalCount}
-                </span>
+                <span className="font-bold text-[#252B42]">{summary.totalCount}</span>
               </div>
               <div className="text-[#252B42] font-bold text-[18px]">
                 Total:{" "}
-                <span className="text-[#23856D]">
-                  ${summary.productsTotal.toFixed(2)}
-                </span>
+                <span className="text-[#23856D]">${summary.productsTotal.toFixed(2)}</span>
               </div>
             </div>
           </div>
 
-          {/* RIGHT: Order Summary Box (T19) */}
+          {/* RIGHT: Order Summary Box */}
           <div className="lg:sticky lg:top-6">
+            {/* TOP button */}
             <button
               type="button"
-              disabled
-              className="w-full h-12 rounded-[8px] bg-[#F57E2C] text-white font-bold disabled:opacity-100"
+              onClick={goToCheckoutAddress}
+              disabled={!canCreateOrder}
+              className="w-full h-12 rounded-[8px] bg-[#F57E2C] text-white font-bold disabled:opacity-50"
             >
               Create Order →
             </button>
 
             <div className="mt-4 border border-[#E6E6E6] rounded-[10px] bg-white p-5">
-              <div className="text-[20px] font-bold text-[#252B42]">
-                Order Summary
-              </div>
+              <div className="text-[20px] font-bold text-[#252B42]">Order Summary</div>
 
               <div className="mt-4 space-y-3 text-[14px]">
                 <div className="flex items-center justify-between text-[#737373]">
@@ -263,19 +277,23 @@ export default function CartPage() {
                   </span>
                 </div>
               </div>
+
+              {!canCreateOrder && (
+                <div className="mt-3 text-[12px] text-[#BDBDBD]">
+                  Create Order için en az 1 ürünü seçmelisin (checkbox).
+                </div>
+              )}
             </div>
 
+            {/* BOTTOM button */}
             <button
               type="button"
-              disabled
-              className="mt-4 w-full h-12 rounded-[8px] bg-[#F57E2C] text-white font-bold disabled:opacity-100"
+              onClick={goToCheckoutAddress}
+              disabled={!canCreateOrder}
+              className="mt-4 w-full h-12 rounded-[8px] bg-[#F57E2C] text-white font-bold disabled:opacity-50"
             >
               Create Order →
             </button>
-
-            <div className="mt-3 text-[12px] text-[#BDBDBD]">
-              Create Order butonu şimdilik fonksiyonsuz (sonraki task).
-            </div>
           </div>
         </div>
       </div>

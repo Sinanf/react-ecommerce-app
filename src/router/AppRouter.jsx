@@ -14,6 +14,9 @@ import SignUpPage from "../pages/SignUpPage";
 import LoginPage from "../pages/LoginPage";
 import ProductDetailPage from "../pages/ProductDetailPage";
 import CartPage from "../pages/CartPage";
+import RequireAuth from "./RequireAuth";
+import CreateOrderAddressPage from "../pages/CreateOrderAddressPage";
+
 
 export default function AppRouter() {
   return (
@@ -24,6 +27,14 @@ export default function AppRouter() {
       <Route path="/shop/:gender/:categoryName/:categoryId" element={<ShopPage />} />
 
       <Route path="/cart" element={<CartPage />} />
+      <Route
+        path="/order/create"
+        element={
+          <RequireAuth>
+            <CreateOrderAddressPage />
+          </RequireAuth>
+        }
+      />
 
 
       <Route path="/signup" element={<SignUpPage />} />
@@ -32,9 +43,9 @@ export default function AppRouter() {
       <Route path="/product" element={<ProductPage />} />
       <Route path="/product/:id" element={<ProductPage />} />
       <Route
-  path="/shop/:gender/:categoryName/:categoryId/:productNameSlug/:productId"
-  element={<ProductDetailPage />}
-/>
+        path="/shop/:gender/:categoryName/:categoryId/:productNameSlug/:productId"
+        element={<ProductDetailPage />}
+      />
 
       <Route path="/pricing" element={<PricingPage />} />
       <Route path="/contact" element={<ContactPage />} />

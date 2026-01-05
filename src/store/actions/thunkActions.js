@@ -3,7 +3,7 @@
 import { toast } from "react-toastify";
 import md5 from "blueimp-md5";
 import { api, setAuthToken, clearAuthToken } from "../../api/api";
-import { setUser, setRoles } from "./clientActions";
+import { setUser, setRoles, setAddressList } from "./clientActions";
 import { setCategories, setFetchState, setProductList, setTotal, setProductFetchState, setProduct } from "./productActions";
 
 /* --------------------------------------------------
@@ -236,3 +236,58 @@ export const fetchProductById = (productId) => async (dispatch) => {
   }
 };
 
+// GET /user/address
+export const fetchAddressList = () => async (dispatch) => {
+  try {
+    const res = await api.get("/user/address");
+    const list = Array.isArray(res.data) ? res.data : [];
+    dispatch(setAddressList(list));
+    return { ok: true, list };
+  } catch (err) {
+    toast.error("Address list could not be loaded");
+    console.error("fetchAddressList error:", err);
+    return { ok: false };
+  }
+};
+
+// POST /user/address
+export const createAddress = (payload) => async (dispatch) => {
+  try {
+    await api.post("/user/address", payload);
+    toast.success("Address added");
+    dispatch(fetchAddressList());
+    return { ok: true };
+  } catch (err) {
+    toast.error("Address could not be added");
+    console.error("createAddress error:", err);
+    return { ok: false };
+  }
+};
+
+// PUT /user/address
+export const updateAddress = (payload) => async (dispatch) => {
+  try {
+    await api.put("/user/address", payload);
+    toast.success("Address updated");
+    dispatch(fetchAddressList());
+    return { ok: true };
+  } catch (err) {
+    toast.error("Address could not be updated");
+    console.error("updateAddress error:", err);
+    return { ok: false };
+  }
+};
+
+// DELETE /user/address/:addressId
+export const deleteAddress = (addressId) => async (dispatch) => {
+  try {
+    await api.delete(`/user/address/${addressId}`);
+    toast.success("Address deleted");
+    dispatch(fetchAddressList());
+    return { ok: true };
+  } catch (err) {
+    toast.error("Address could not be deleted");
+    console.error("deleteAddress error:", err);
+    return { ok: false };
+  }
+};
