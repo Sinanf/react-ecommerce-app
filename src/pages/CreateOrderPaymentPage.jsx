@@ -1,0 +1,428 @@
+// src/pages/CreateOrderPaymentPage.jsx
+import { useEffect, useMemo, useState } from "react";
+import { useDispatch, useSelector } from "react-redux";
+import { Link } from "react-router-dom";
+import {
+  fetchCardList,
+  createCard,
+  updateCard,
+  deleteCard,
+} from "../store/actions/thunkActions";
+
+const emptyForm = {
+  id: null,
+  card_no: "",
+  expire_month: "",
+  expire_year: "",
+  name_on_card: "",
+};
+
+const onlyDigits = (s = "") => String(s).replace(/\D/g, "");
+const formatCardNo = (digits = "") => {
+  const d = onlyDigits(digits).slice(0, 16);
+  return d.replace(/(\d{4})(?=\d)/g, "$1 ").trim();
+};
+const maskCardNo = (digits = "") => {
+  const d = onlyDigits(digits);
+  if (!d) return "";
+  const last4 = d.slice(-4);
+  return `**** **** **** ${last4}`;
+};
+
+export default function CreateOrderPaymentPage() {
+  const dispatch = useDispatch();
+
+  const cards = useSelector((s) => s?.client?.creditCards || []);
+  const cart = useSelector((s) => s?.cart?.cart || []);
+
+  // local UI state
+  const [showForm, setShowForm] = useState(false);
+  const [editing, setEditing] = useState(null); // card object
+  const [form, setForm] = useState(emptyForm);
+
+  const [selectedCardId, setSelectedCardId] = useState(null);
+
+  // load saved cards
+  useEffect(() => {
+    dispatch(fetchCardList());
+  }, [dispatch]);
+
+  // default selection without setState-in-effect
+  const firstCardId = cards?.[0]?.id ?? null;
+  const effectiveSelectedId = selectedCardId ?? firstCardId;
+
+  const selectedCard = useMemo(() => {
+    return cards.find((c) => String(c.id) === String(effectiveSelectedId)) || null;
+  }, [cards, effectiveSelectedId]);
+
+  // Order Summary (checked ürünler)
+  const summary = useMemo(() => {
+    const checked = cart.filter((i) => i.checked);
+    const productsTotal = checked.reduce(
+      (acc, i) => acc + Number(i.count || 0) * Number(i?.product?.price || 0),
+      0
+    );
+    const shipping = productsTotal > 150 ? 0 : checked.length ? 29.99 : 0;
+    const discount = productsTotal > 150 ? 29.99 : 0;
+    const grandTotal = productsTotal + shipping - discount;
+
+    return { productsTotal, shipping, discount, grandTotal };
+  }, [cart]);
+
+  const months = useMemo(() => Array.from({ length: 12 }, (_, i) => i + 1), []);
+  const years = useMemo(() => {
+    const now = new Date().getFullYear();
+    return Array.from({ length: 16 }, (_, i) => now + i); // now..now+15
+  }, []);
+
+  const openCreate = () => {
+    setEditing(null);
+    setForm(emptyForm);
+    setShowForm(true);
+  };
+
+  const openEdit = (card) => {
+    setEditing(card);
+    setForm({
+      id: card?.id ?? null,
+      card_no: String(card?.card_no ?? ""),
+      expire_month: String(card?.expire_month ?? ""),
+      expire_year: String(card?.expire_year ?? ""),
+      name_on_card: String(card?.name_on_card ?? ""),
+    });
+    setShowForm(true);
+  };
+
+  const closeForm = () => {
+    setShowForm(false);
+    setEditing(null);
+    setForm(emptyForm);
+  };
+
+  const validate = () => {
+    const cardDigits = onlyDigits(form.card_no);
+    if (cardDigits.length !== 16) return "Kart numarası 16 haneli olmalı.";
+    const m = Number(form.expire_month);
+    const y = Number(form.expire_year);
+    if (!m || m < 1 || m > 12) return "Geçerli bir ay seç.";
+    if (!y || y < 2000) return "Geçerli bir yıl seç.";
+    if (!String(form.name_on_card || "").trim()) return "Kart üzerindeki isim gerekli.";
+    return null;
+  };
+
+  const onSubmit = async (e) => {
+    e.preventDefault();
+    const errMsg = validate();
+    if (errMsg) {
+      // toast'ı thunk içinde yapıyorsun; burada sadece basit fallback:
+      alert(errMsg);
+      return;
+    }
+
+    const payload = {
+      card_no: onlyDigits(form.card_no),
+      expire_month: Number(form.expire_month),
+      expire_year: Number(form.expire_year),
+      name_on_card: form.name_on_card.trim(),
+    };
+
+    if (editing?.id) {
+      await dispatch(updateCard({ id: editing.id, ...payload }));
+    } else {
+      await dispatch(createCard(payload));
+    }
+
+    closeForm();
+  };
+
+  const onDelete = async (cardId) => {
+    await dispatch(deleteCard(cardId));
+    if (String(selectedCardId) === String(cardId)) setSelectedCardId(null);
+  };
+
+  // Payment options “fetched by card data” → basit UI (brand / installment placeholder)
+  const paymentOptions = useMemo(() => {
+    const digits = onlyDigits(selectedCard?.card_no || "");
+    const first = digits[0];
+    const brand =
+      first === "4" ? "VISA" : first === "5" ? "Mastercard" : digits ? "Card" : "-";
+
+    // Burayı ileride backend’den gerçekten çekebilirsin.
+    return [
+      { id: "single", title: "Tek Çekim", desc: `Kart: ${brand}` },
+      { id: "installment", title: "Taksit (placeholder)", desc: "Taksit seçenekleri sonraki task" },
+    ];
+  }, [selectedCard]);
+
+  return (
+    <div className="w-full bg-white">
+      <div className="w-full max-w-6xl mx-auto px-4 py-10">
+        {/* Steps bar */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div className="border border-[#E6E6E6] rounded-[8px] p-4 opacity-60">
+            <div className="font-bold text-[#252B42]">1 — Address Information</div>
+            <div className="text-[#737373] text-[14px] mt-1">Shipping & billing address</div>
+          </div>
+
+          <div className="border border-[#E6E6E6] rounded-[8px] p-4">
+            <div className="font-bold text-[#252B42]">2 — Payment Options</div>
+            <div className="text-[#737373] text-[14px] mt-1">Credit card</div>
+          </div>
+
+          <div className="md:flex md:justify-end">
+            <button
+              type="button"
+              className="w-full md:w-auto h-11 px-8 bg-[#E77C40] text-white font-bold rounded-[8px]"
+              disabled
+            >
+              Save & Continue
+            </button>
+          </div>
+        </div>
+
+        <div className="mt-8 grid grid-cols-1 lg:grid-cols-[1fr_360px] gap-8">
+          {/* LEFT */}
+          <div className="border border-[#E6E6E6] rounded-[10px] p-6">
+            <div className="flex items-center justify-between">
+              <h2 className="text-[20px] font-bold text-[#252B42]">Payment Method</h2>
+
+              <div className="flex items-center gap-3">
+                <Link
+                  to="/order/create"
+                  className="h-10 px-4 border border-[#E6E6E6] rounded-[8px] text-[#252B42] font-bold hover:bg-[#FAFAFA] flex items-center"
+                >
+                  ← Back
+                </Link>
+
+                <button
+                  type="button"
+                  onClick={openCreate}
+                  className="h-10 px-4 border border-[#E6E6E6] rounded-[8px] text-[#252B42] font-bold hover:bg-[#FAFAFA]"
+                >
+                  + Add New Card
+                </button>
+              </div>
+            </div>
+
+            {/* Saved cards */}
+            <div className="mt-6">
+              <div className="text-[16px] font-bold text-[#252B42]">Saved Cards</div>
+
+              {cards.length === 0 ? (
+                <div className="mt-3 text-[#737373] text-[14px]">
+                  No saved cards yet. Click <span className="font-bold">“Add New Card”</span>.
+                </div>
+              ) : (
+                <div className="mt-4 grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {cards.map((c) => {
+                    const selected = String(c.id) === String(effectiveSelectedId);
+                    return (
+                      <div
+                        key={c.id}
+                        className={`border rounded-[10px] p-4 ${
+                          selected ? "border-[#23A6F0] bg-[#F2FAFF]" : "border-[#E6E6E6]"
+                        }`}
+                      >
+                        <div className="flex items-start justify-between gap-3">
+                          <label className="flex items-start gap-2 cursor-pointer">
+                            <input
+                              type="radio"
+                              name="card"
+                              checked={selected}
+                              onChange={() => setSelectedCardId(c.id)}
+                              className="mt-1 accent-[#23A6F0]"
+                            />
+                            <div>
+                              <div className="font-bold text-[#252B42] text-[14px]">
+                                {c.name_on_card || "Card"}
+                              </div>
+                              <div className="text-[#737373] text-[13px] mt-1">
+                                {maskCardNo(c.card_no)}
+                              </div>
+                              <div className="text-[#737373] text-[13px] mt-1">
+                                Exp: {String(c.expire_month).padStart(2, "0")}/{c.expire_year}
+                              </div>
+                            </div>
+                          </label>
+
+                          <div className="flex items-center gap-3">
+                            <button
+                              type="button"
+                              onClick={() => openEdit(c)}
+                              className="text-[12px] font-bold text-[#23A6F0]"
+                            >
+                              Edit
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => onDelete(c.id)}
+                              className="text-[12px] font-bold text-[#BDBDBD] hover:text-[#252B42]"
+                            >
+                              Delete
+                            </button>
+                          </div>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
+            </div>
+
+            {/* Payment options fetched by card data (UI placeholder) */}
+            <div className="mt-8">
+              <div className="text-[16px] font-bold text-[#252B42]">Payment Options</div>
+              <div className="mt-4 grid grid-cols-1 md:grid-cols-2 gap-4">
+                {paymentOptions.map((opt) => (
+                  <div key={opt.id} className="border border-[#E6E6E6] rounded-[10px] p-4">
+                    <div className="font-bold text-[#252B42]">{opt.title}</div>
+                    <div className="mt-1 text-[#737373] text-[13px]">{opt.desc}</div>
+                  </div>
+                ))}
+              </div>
+
+              <div className="mt-3 text-[12px] text-[#BDBDBD]">
+                (Bu bölüm T21’de “card data’ya göre payment options” deniyor; şimdilik UI placeholder,
+                backend varsa sonraki adımda gerçek seçenekleri bağlarız.)
+              </div>
+            </div>
+
+            {/* Form */}
+            {showForm && (
+              <div className="mt-8 border-t border-[#E6E6E6] pt-6">
+                <div className="flex items-center justify-between">
+                  <div className="font-bold text-[#252B42]">
+                    {editing ? "Update Card" : "New Card"}
+                  </div>
+                  <button
+                    type="button"
+                    onClick={closeForm}
+                    className="text-[#BDBDBD] hover:text-[#252B42]"
+                  >
+                    ✕
+                  </button>
+                </div>
+
+                <form onSubmit={onSubmit} className="mt-4 grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <input
+                    value={formatCardNo(form.card_no)}
+                    onChange={(e) =>
+                      setForm((p) => ({ ...p, card_no: onlyDigits(e.target.value) }))
+                    }
+                    placeholder="Card Number (16 digits)"
+                    className="h-11 px-4 border border-[#E6E6E6] rounded-[8px] md:col-span-2"
+                    inputMode="numeric"
+                    required
+                  />
+
+                  <select
+                    value={form.expire_month}
+                    onChange={(e) => setForm((p) => ({ ...p, expire_month: e.target.value }))}
+                    className="h-11 px-4 border border-[#E6E6E6] rounded-[8px] bg-white"
+                    required
+                  >
+                    <option value="">Expire Month</option>
+                    {months.map((m) => (
+                      <option key={m} value={m}>
+                        {String(m).padStart(2, "0")}
+                      </option>
+                    ))}
+                  </select>
+
+                  <select
+                    value={form.expire_year}
+                    onChange={(e) => setForm((p) => ({ ...p, expire_year: e.target.value }))}
+                    className="h-11 px-4 border border-[#E6E6E6] rounded-[8px] bg-white"
+                    required
+                  >
+                    <option value="">Expire Year</option>
+                    {years.map((y) => (
+                      <option key={y} value={y}>
+                        {y}
+                      </option>
+                    ))}
+                  </select>
+
+                  <input
+                    value={form.name_on_card}
+                    onChange={(e) => setForm((p) => ({ ...p, name_on_card: e.target.value }))}
+                    placeholder="Name on Card"
+                    className="h-11 px-4 border border-[#E6E6E6] rounded-[8px] md:col-span-2"
+                    required
+                  />
+
+                  <div className="md:col-span-2 flex items-center gap-3">
+                    <button
+                      type="submit"
+                      className="h-11 px-8 bg-[#23A6F0] text-white font-bold rounded-[8px]"
+                    >
+                      {editing ? "Update" : "Save"}
+                    </button>
+                    <button
+                      type="button"
+                      onClick={closeForm}
+                      className="h-11 px-8 border border-[#E6E6E6] rounded-[8px] font-bold text-[#252B42]"
+                    >
+                      Cancel
+                    </button>
+                  </div>
+                </form>
+              </div>
+            )}
+          </div>
+
+          {/* RIGHT: Order Summary */}
+          <div className="lg:sticky lg:top-6 h-fit">
+            <div className="border border-[#E6E6E6] rounded-[10px] p-6">
+              <div className="text-[20px] font-bold text-[#252B42]">Order Summary</div>
+
+              <div className="mt-4 space-y-3 text-[14px]">
+                <div className="flex items-center justify-between text-[#737373]">
+                  <span>Products Total</span>
+                  <span className="font-bold text-[#252B42]">
+                    ${summary.productsTotal.toFixed(2)}
+                  </span>
+                </div>
+
+                <div className="flex items-center justify-between text-[#737373]">
+                  <span>Shipping</span>
+                  <span className="font-bold text-[#252B42]">
+                    ${summary.shipping.toFixed(2)}
+                  </span>
+                </div>
+
+                <div className="flex items-center justify-between text-[#737373]">
+                  <span>Discount</span>
+                  <span className="font-bold text-[#E77C40]">
+                    -${summary.discount.toFixed(2)}
+                  </span>
+                </div>
+
+                <div className="mt-3 h-px bg-[#E6E6E6]" />
+
+                <div className="flex items-center justify-between">
+                  <span className="font-bold text-[#252B42]">Grand Total</span>
+                  <span className="font-bold text-[#E77C40] text-[18px]">
+                    ${summary.grandTotal.toFixed(2)}
+                  </span>
+                </div>
+              </div>
+
+              <button
+                type="button"
+                className="mt-6 w-full h-11 bg-[#E77C40] text-white font-bold rounded-[8px]"
+                disabled
+              >
+                Pay & Continue
+              </button>
+
+              <div className="mt-3 text-[12px] text-[#BDBDBD]">
+                (Buton işlevi sonraki tasklarda; T21’de kart CRUD + listeleme hedefleniyor.)
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}

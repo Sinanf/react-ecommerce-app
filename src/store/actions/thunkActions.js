@@ -3,8 +3,15 @@
 import { toast } from "react-toastify";
 import md5 from "blueimp-md5";
 import { api, setAuthToken, clearAuthToken } from "../../api/api";
-import { setUser, setRoles, setAddressList } from "./clientActions";
-import { setCategories, setFetchState, setProductList, setTotal, setProductFetchState, setProduct } from "./productActions";
+import { setUser, setRoles, setAddressList, setCardList } from "./clientActions"; // ✅ T21: setCardList eklendi
+import {
+  setCategories,
+  setFetchState,
+  setProductList,
+  setTotal,
+  setProductFetchState,
+  setProduct,
+} from "./productActions";
 
 /* --------------------------------------------------
    Helpers
@@ -56,7 +63,6 @@ export const loginUser =
 export const verifyToken = () => async (dispatch) => {
   const token = localStorage.getItem("token");
 
-  // Token yok → temiz çık
   if (!token) {
     clearAuthToken();
     dispatch(setUser({}));
@@ -64,9 +70,7 @@ export const verifyToken = () => async (dispatch) => {
   }
 
   try {
-    // Header’a token yaz (Bearer YOK)
     setAuthToken(token);
-
     const res = await api.get("/verify");
 
     const data = res?.data || {};
@@ -79,13 +83,11 @@ export const verifyToken = () => async (dispatch) => {
 
     dispatch(setUser(user));
 
-    // Token yenile
     localStorage.setItem("token", newToken);
     setAuthToken(newToken);
 
     return { ok: true };
   } catch (err) {
-    // Token geçersiz → HER ŞEYİ TEMİZLE
     localStorage.removeItem("token");
     clearAuthToken();
     dispatch(setUser({}));
@@ -121,10 +123,8 @@ export const fetchRolesIfNeeded = () => async (dispatch, getState) => {
   }
 };
 
-/* ... login / verify / logout / roles ... */
-
 /* --------------------------------------------------
-   CATEGORIES (T12) - senin mevcut halin aynı kalabilir
+   CATEGORIES (T12)
 -------------------------------------------------- */
 export const fetchCategoriesIfNeeded = () => async (dispatch, getState) => {
   const categories = getState()?.product?.categories;
@@ -143,7 +143,9 @@ export const fetchCategoriesIfNeeded = () => async (dispatch, getState) => {
   }
 };
 
-// Parametreli versiyon (T14 için önerilen):
+/* --------------------------------------------------
+   PRODUCTS
+-------------------------------------------------- */
 export const fetchProductsByQuery =
   ({ categoryId } = {}) =>
   async (dispatch, getState) => {
@@ -159,7 +161,6 @@ export const fetchProductsByQuery =
       if (filter) params.set("filter", String(filter));
       if (sort) params.set("sort", String(sort));
 
-      // limit/offset kullanacaksan (opsiyonel)
       if (limit != null) params.set("limit", String(limit));
       if (offset != null) params.set("offset", String(offset));
 
@@ -185,14 +186,14 @@ export const fetchProductsByQuery =
     }
   };
 
-  export const fetchProducts = () => async (dispatch, getState) => {
+export const fetchProducts = () => async (dispatch, getState) => {
   try {
     dispatch(setProductFetchState("FETCHING"));
 
     const state = getState();
     const { limit, offset, filter, sort } = state.product;
 
-    const categoryId = state.product?.categoryId; // varsa
+    const categoryId = state.product?.categoryId;
     const params = new URLSearchParams();
 
     if (categoryId) params.set("category", String(categoryId));
@@ -236,7 +237,9 @@ export const fetchProductById = (productId) => async (dispatch) => {
   }
 };
 
-// GET /user/address
+/* --------------------------------------------------
+   ADDRESS (T20)
+-------------------------------------------------- */
 export const fetchAddressList = () => async (dispatch) => {
   try {
     const res = await api.get("/user/address");
@@ -250,7 +253,6 @@ export const fetchAddressList = () => async (dispatch) => {
   }
 };
 
-// POST /user/address
 export const createAddress = (payload) => async (dispatch) => {
   try {
     await api.post("/user/address", payload);
@@ -264,7 +266,6 @@ export const createAddress = (payload) => async (dispatch) => {
   }
 };
 
-// PUT /user/address
 export const updateAddress = (payload) => async (dispatch) => {
   try {
     await api.put("/user/address", payload);
@@ -278,7 +279,6 @@ export const updateAddress = (payload) => async (dispatch) => {
   }
 };
 
-// DELETE /user/address/:addressId
 export const deleteAddress = (addressId) => async (dispatch) => {
   try {
     await api.delete(`/user/address/${addressId}`);
@@ -288,6 +288,66 @@ export const deleteAddress = (addressId) => async (dispatch) => {
   } catch (err) {
     toast.error("Address could not be deleted");
     console.error("deleteAddress error:", err);
+    return { ok: false };
+  }
+};
+
+/* --------------------------------------------------
+   ✅ T21 — CREDIT CARDS
+-------------------------------------------------- */
+
+// GET /user/card
+export const fetchCardList = () => async (dispatch) => {
+  try {
+    const res = await api.get("/user/card");
+    const list = Array.isArray(res.data) ? res.data : [];
+    dispatch(setCardList(list));
+    return { ok: true, list };
+  } catch (err) {
+    toast.error("Card list could not be loaded");
+    console.error("fetchCardList error:", err);
+    return { ok: false };
+  }
+};
+
+// POST /user/card
+export const createCard = (payload) => async (dispatch) => {
+  try {
+    await api.post("/user/card", payload);
+    toast.success("Card added");
+    dispatch(fetchCardList());
+    return { ok: true };
+  } catch (err) {
+    toast.error("Card could not be added");
+    console.error("createCard error:", err);
+    return { ok: false };
+  }
+};
+
+// PUT /user/card
+export const updateCard = (payload) => async (dispatch) => {
+  try {
+    await api.put("/user/card", payload);
+    toast.success("Card updated");
+    dispatch(fetchCardList());
+    return { ok: true };
+  } catch (err) {
+    toast.error("Card could not be updated");
+    console.error("updateCard error:", err);
+    return { ok: false };
+  }
+};
+
+// DELETE /user/card/:cardId
+export const deleteCard = (cardId) => async (dispatch) => {
+  try {
+    await api.delete(`/user/card/${cardId}`);
+    toast.success("Card deleted");
+    dispatch(fetchCardList());
+    return { ok: true };
+  } catch (err) {
+    toast.error("Card could not be deleted");
+    console.error("deleteCard error:", err);
     return { ok: false };
   }
 };
