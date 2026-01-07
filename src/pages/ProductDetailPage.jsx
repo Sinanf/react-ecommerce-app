@@ -2,9 +2,14 @@
 import { useEffect, useMemo, useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
-import { fetchProductById } from "../store/actions/thunkActions";
+import { fetchCategoriesIfNeeded, fetchProductById } from "../store/actions/thunkActions";
 import { addToCart } from "../store/actions/cartActions";
 import ProductCard from "../components/ProductCard";
+
+const slugifyPath = (text = "") =>
+  String(text).toLowerCase().trim().replace(/\s+/g, "-");
+
+const genderPath = (g) => (g === "k" ? "kadin" : g === "e" ? "erkek" : "unisex");
 
 function Stars({ value = 0 }) {
   const v = Math.max(0, Math.min(5, Number(value || 0)));
@@ -32,6 +37,7 @@ function ProductDetailContent({ productId }) {
 
   // bestseller için liste (elinde varsa)
   const productList = useSelector((s) => s?.product?.productList || []);
+  const categories = useSelector((s) => s?.product?.categories || []);
 
   const [activeImgIdx, setActiveImgIdx] = useState(0);
   const [tab, setTab] = useState("desc");
@@ -39,6 +45,10 @@ function ProductDetailContent({ productId }) {
   useEffect(() => {
     dispatch(fetchProductById(productId));
   }, [dispatch, productId]);
+
+  useEffect(() => {
+    dispatch(fetchCategoriesIfNeeded());
+  }, [dispatch]);
 
   const isLoading = fetchState === "FETCHING";
 
@@ -325,13 +335,22 @@ function ProductDetailContent({ productId }) {
                 {bestseller.map((p) => {
                   const firstImg =
                     p?.images?.[0]?.url || `https://picsum.photos/800/900?random=${p.id}`;
+                  const cat = categories.find((c) => Number(c.id) === Number(p.category_id));
+                  const gender = genderPath(cat?.gender);
+                  const categoryName = slugifyPath(
+                    cat?.code?.split(":")?.[1] || cat?.title || "kategori"
+                  );
+                  const productNameSlug = slugifyPath(p?.name || "urun");
+                  const to = cat
+                    ? `/shop/${gender}/${categoryName}/${cat.id}/${productNameSlug}/${p.id}`
+                    : `/product/${p.id}`;
 
                   return (
                     <div key={p.id} className="w-full">
                       <ProductCard
-                        variant="compact" // ✅ fark burada
+                        variant="compact" // ?. fark burada
                         id={p.id}
-                        to={`/product/${p.id}`}
+                        to={to}
                         img={firstImg}
                         title={p.name || "Graphic Design"}
                         department="English Department"
@@ -354,3 +373,4 @@ export default function ProductDetailPage() {
   const { productId } = useParams();
   return <ProductDetailContent key={productId} productId={productId} />;
 }
+

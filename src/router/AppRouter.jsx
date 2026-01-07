@@ -17,24 +17,19 @@ import CartPage from "../pages/CartPage";
 
 import RequireAuth from "./RequireAuth";
 import CreateOrderAddressPage from "../pages/CreateOrderAddressPage";
-
-// ✅ T21 - Step 2
 import CreateOrderPaymentPage from "../pages/CreateOrderPaymentPage";
-
 import PreviousOrdersPage from "../pages/PreviousOrdersPage";
-
 
 export default function AppRouter() {
   return (
     <Routes>
+      {/* Public pages */}
       <Route path="/" element={<HomePage />} />
-
       <Route path="/shop" element={<ShopPage />} />
       <Route path="/shop/:gender/:categoryName/:categoryId" element={<ShopPage />} />
-
       <Route path="/cart" element={<CartPage />} />
 
-      {/* ✅ Create Order Flow */}
+      {/* Protected order flow */}
       <Route
         path="/order/create"
         element={
@@ -43,8 +38,6 @@ export default function AppRouter() {
           </RequireAuth>
         }
       />
-
-      {/* ✅ T21: Step 2 - Credit Card */}
       <Route
         path="/order/payment"
         element={
@@ -53,7 +46,6 @@ export default function AppRouter() {
           </RequireAuth>
         }
       />
-
       <Route
         path="/orders"
         element={
@@ -63,25 +55,28 @@ export default function AppRouter() {
         }
       />
 
-
+      {/* Auth */}
       <Route path="/signup" element={<SignUpPage />} />
       <Route path="/login" element={<LoginPage />} />
 
+      {/* Product pages */}
       <Route path="/product" element={<ProductPage />} />
       <Route path="/product/:id" element={<ProductPage />} />
-
       <Route
         path="/shop/:gender/:categoryName/:categoryId/:productNameSlug/:productId"
         element={<ProductDetailPage />}
       />
 
+      {/* Static pages */}
       <Route path="/pricing" element={<PricingPage />} />
       <Route path="/contact" element={<ContactPage />} />
       <Route path="/team" element={<TeamPage />} />
       <Route path="/about" element={<AboutPage />} />
 
+      {/* Blog */}
       <Route path="/blog/:id" element={<BlogPostPage />} />
 
+      {/* Fallback */}
       <Route path="*" element={<NotFoundPage />} />
     </Routes>
   );
