@@ -4,7 +4,7 @@ import { Link, useParams } from "react-router-dom";
 import { Heart, ShoppingCart, Eye, ChevronLeft, ChevronRight, Star } from "lucide-react";
 
 import ProductCard from "../components/ProductCard";
-import { getProductById, productDetails } from "../data/productpageData";
+import { getProductById, productDetails } from "../data/productPageData";
 
 
 export default function ProductPage() {

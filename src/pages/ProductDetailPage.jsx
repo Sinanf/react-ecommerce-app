@@ -1,6 +1,6 @@
 // src/pages/ProductDetailPage.jsx
 import { useEffect, useMemo, useState } from "react";
-import { Link, useNavigate, useParams } from "react-router-dom";
+import { Link, useParams } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { fetchProductById } from "../store/actions/thunkActions";
 import { addToCart } from "../store/actions/cartActions";
@@ -25,7 +25,7 @@ function Stars({ value = 0 }) {
 
 function ProductDetailContent({ productId }) {
   const dispatch = useDispatch();
-  const navigate = useNavigate();
+  
 
   const product = useSelector((s) => s?.product?.product);
   const fetchState = useSelector((s) => s?.product?.productFetchState);
