@@ -15,8 +15,10 @@ export default function CartPage() {
   const navigate = useNavigate();
   const location = useLocation();
 
+  /* CART STATE */
   const cart = useSelector((s) => s?.cart?.cart || []);
 
+  /* ORDER SUMMARY (based on checked items) */
   const summary = useMemo(() => {
     const checkedItems = cart.filter((i) => i.checked);
 
@@ -25,10 +27,7 @@ export default function CartPage() {
       0
     );
 
-    // Basit kural: seçili ürün varsa kargo 29.99
     const shipping = checkedItems.length > 0 ? 29.99 : 0;
-
-    // Basit indirim kuralı: 150+ ise kargo bedava (indirim = kargo kadar)
     const discount = productsTotal >= 150 ? shipping : 0;
 
     const grandTotal = productsTotal + shipping - discount;
@@ -45,20 +44,22 @@ export default function CartPage() {
     };
   }, [cart]);
 
+  /* CHECKOUT GUARD */
   const canCreateOrder = summary.checkedCount > 0;
 
+  /* CHECKOUT NAVIGATION */
   const goToCheckoutAddress = () => {
     if (!canCreateOrder) return;
-    // RequireAuth route’un var: /order/create
-    // Login'e düşerse RequireAuth zaten state kullanabilir diye from veriyoruz
     navigate("/order/create", { state: { from: location } });
   };
 
+  /* EMPTY CART */
   if (!cart.length) {
     return (
       <div className="w-full bg-white">
         <div className="w-full max-w-6xl mx-auto px-4 py-12">
           <h1 className="text-[24px] font-bold text-[#252B42]">Shopping Cart</h1>
+
           <div className="mt-6 text-[#737373]">
             Cart is empty.{" "}
             <Link to="/shop" className="text-[#23A6F0] font-bold">
@@ -70,22 +71,24 @@ export default function CartPage() {
     );
   }
 
+  /* CART PAGE */
   return (
     <div className="w-full bg-white">
       <div className="w-full max-w-6xl mx-auto px-4 py-10">
-        {/* Header */}
+        {/* PAGE HEADER */}
         <div className="flex items-center justify-between">
           <h1 className="text-[24px] font-bold text-[#252B42]">Shopping Cart</h1>
+
           <Link to="/shop" className="text-[#23A6F0] font-bold">
             Continue Shopping →
           </Link>
         </div>
 
-        {/* CONTENT GRID: table + order summary */}
+        {/* LAYOUT GRID: TABLE + SUMMARY */}
         <div className="mt-8 grid grid-cols-1 lg:grid-cols-[1fr_340px] gap-6 items-start">
-          {/* LEFT: Table */}
+          {/* LEFT: CART TABLE */}
           <div className="border border-[#E6E6E6] rounded-[8px] overflow-hidden">
-            {/* table head */}
+            {/* TABLE HEADER (desktop) */}
             <div className="hidden md:grid grid-cols-[60px_1.2fr_140px_160px_140px_80px] bg-[#FAFAFA] border-b border-[#E6E6E6]">
               <div className="p-4 text-[14px] font-bold text-[#252B42]">Sel</div>
               <div className="p-4 text-[14px] font-bold text-[#252B42]">
@@ -100,16 +103,17 @@ export default function CartPage() {
               <div className="p-4 text-[14px] font-bold text-[#252B42]">
                 Total
               </div>
-              <div className="p-4 text-[14px] font-bold text-[#252B42]"></div>
+              <div className="p-4 text-[14px] font-bold text-[#252B42]" />
             </div>
 
-            {/* rows */}
+            {/* TABLE ROWS */}
             <div className="divide-y divide-[#E6E6E6]">
               {cart.map((item) => {
                 const p = item.product || {};
                 const img =
                   p?.images?.[0]?.url ||
                   "https://picsum.photos/200/200?random=11";
+
                 const price = Number(p.price || 0);
                 const count = Number(item.count || 0);
                 const rowTotal = price * count;
@@ -119,7 +123,7 @@ export default function CartPage() {
                     key={p.id}
                     className="grid grid-cols-1 md:grid-cols-[60px_1.2fr_140px_160px_140px_80px]"
                   >
-                    {/* mobile layout header */}
+                    {/* MOBILE: ROW HEADER (name + remove) */}
                     <div className="md:hidden flex items-center justify-between px-4 pt-4">
                       <div className="text-[#252B42] font-bold">{p.name}</div>
                       <button
@@ -132,7 +136,7 @@ export default function CartPage() {
                       </button>
                     </div>
 
-                    {/* checkbox */}
+                    {/* CHECKBOX */}
                     <div className="p-4 flex items-center justify-center">
                       <input
                         type="checkbox"
@@ -142,7 +146,7 @@ export default function CartPage() {
                       />
                     </div>
 
-                    {/* product */}
+                    {/* PRODUCT (image + meta) */}
                     <div className="p-4 flex items-center gap-4">
                       <div className="w-20 h-20 rounded-[6px] overflow-hidden border border-[#E6E6E6] bg-[#FAFAFA] shrink-0">
                         <img
@@ -151,6 +155,7 @@ export default function CartPage() {
                           className="w-full h-full object-cover"
                         />
                       </div>
+
                       <div className="flex flex-col">
                         <div className="text-[#252B42] font-bold">{p.name}</div>
                         <div className="text-[#737373] text-[14px] line-clamp-2">
@@ -159,12 +164,12 @@ export default function CartPage() {
                       </div>
                     </div>
 
-                    {/* price */}
+                    {/* PRICE */}
                     <div className="p-4 flex items-center text-[#252B42] font-bold">
                       ${price.toFixed(2)}
                     </div>
 
-                    {/* quantity */}
+                    {/* QUANTITY CONTROLS */}
                     <div className="p-4 flex items-center">
                       <div className="inline-flex items-center border border-[#E6E6E6] rounded-[6px] overflow-hidden">
                         <button
@@ -175,9 +180,11 @@ export default function CartPage() {
                         >
                           −
                         </button>
+
                         <div className="w-12 h-10 flex items-center justify-center font-bold text-[#252B42]">
                           {count}
                         </div>
+
                         <button
                           type="button"
                           onClick={() => dispatch(increaseItem(p.id))}
@@ -189,12 +196,12 @@ export default function CartPage() {
                       </div>
                     </div>
 
-                    {/* row total */}
+                    {/* ROW TOTAL */}
                     <div className="p-4 flex items-center font-bold text-[#23856D]">
                       ${rowTotal.toFixed(2)}
                     </div>
 
-                    {/* remove (desktop) */}
+                    {/* REMOVE (desktop) */}
                     <div className="p-4 hidden md:flex items-center justify-center">
                       <button
                         type="button"
@@ -206,7 +213,7 @@ export default function CartPage() {
                       </button>
                     </div>
 
-                    {/* mobile totals */}
+                    {/* MOBILE: PRICE SUMMARY */}
                     <div className="md:hidden px-4 pb-4 flex items-center justify-between">
                       <div className="text-[#737373] text-[14px]">
                         ${price.toFixed(2)} × {count}
@@ -220,22 +227,27 @@ export default function CartPage() {
               })}
             </div>
 
-            {/* footer total */}
+            {/* TABLE FOOTER TOTAL (selected items) */}
             <div className="bg-[#FAFAFA] border-t border-[#E6E6E6] px-4 py-4 flex items-center justify-between">
               <div className="text-[#737373] text-[14px]">
                 Selected items:{" "}
-                <span className="font-bold text-[#252B42]">{summary.totalCount}</span>
+                <span className="font-bold text-[#252B42]">
+                  {summary.totalCount}
+                </span>
               </div>
+
               <div className="text-[#252B42] font-bold text-[18px]">
                 Total:{" "}
-                <span className="text-[#23856D]">${summary.productsTotal.toFixed(2)}</span>
+                <span className="text-[#23856D]">
+                  ${summary.productsTotal.toFixed(2)}
+                </span>
               </div>
             </div>
           </div>
 
-          {/* RIGHT: Order Summary Box */}
+          {/* RIGHT: ORDER SUMMARY */}
           <div className="lg:sticky lg:top-6">
-            {/* TOP button */}
+            {/* CTA (top) */}
             <button
               type="button"
               onClick={goToCheckoutAddress}
@@ -245,8 +257,11 @@ export default function CartPage() {
               Create Order →
             </button>
 
+            {/* SUMMARY BOX */}
             <div className="mt-4 border border-[#E6E6E6] rounded-[10px] bg-white p-5">
-              <div className="text-[20px] font-bold text-[#252B42]">Order Summary</div>
+              <div className="text-[20px] font-bold text-[#252B42]">
+                Order Summary
+              </div>
 
               <div className="mt-4 space-y-3 text-[14px]">
                 <div className="flex items-center justify-between text-[#737373]">
@@ -278,6 +293,7 @@ export default function CartPage() {
                 </div>
               </div>
 
+              {/* CHECKOUT HINT */}
               {!canCreateOrder && (
                 <div className="mt-3 text-[12px] text-[#BDBDBD]">
                   Create Order için en az 1 ürünü seçmelisin (checkbox).
@@ -285,7 +301,7 @@ export default function CartPage() {
               )}
             </div>
 
-            {/* BOTTOM button */}
+            {/* CTA (bottom) */}
             <button
               type="button"
               onClick={goToCheckoutAddress}

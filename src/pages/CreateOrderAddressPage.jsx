@@ -1,14 +1,16 @@
 // src/pages/CreateOrderAddressPage.jsx
 import { useEffect, useMemo, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
+import { useNavigate } from "react-router-dom";
+
 import {
   fetchAddressList,
   createAddress,
   updateAddress,
   deleteAddress,
 } from "../store/actions/thunkActions";
-import { useNavigate } from "react-router-dom";
 
+/* CITY OPTIONS (select) */
 const CITIES = [
   "istanbul",
   "ankara",
@@ -22,6 +24,7 @@ const CITIES = [
   "mersin",
 ];
 
+/* FORM DEFAULTS */
 const emptyForm = {
   title: "",
   name: "",
@@ -37,54 +40,60 @@ export default function CreateOrderAddressPage() {
   const navigate = useNavigate();
   const dispatch = useDispatch();
 
+  /* STORE STATE */
   const addressList = useSelector((s) => s?.client?.addressList || []);
   const cart = useSelector((s) => s?.cart?.cart || []);
 
+  /* FORM UI STATE */
   const [showForm, setShowForm] = useState(false);
   const [editing, setEditing] = useState(null);
   const [form, setForm] = useState(emptyForm);
 
-  // Seçimler
+  /* SELECTION STATE (shipping / billing) */
   const [shippingId, setShippingId] = useState(null);
   const [billingId, setBillingId] = useState(null);
   const [sameAsShipping, setSameAsShipping] = useState(true);
 
-  // Liste geldiğinde default seçimler: ilk address
+  /* DEFAULT IDS (first address) */
   const firstId = addressList?.[0]?.id ?? null;
 
-  const effectiveShippingId = useMemo(() => shippingId ?? firstId, [shippingId, firstId]);
-  const effectiveBillingId = useMemo(() => billingId ?? firstId, [billingId, firstId]);
+  const effectiveShippingId = useMemo(
+    () => shippingId ?? firstId,
+    [shippingId, firstId]
+  );
 
+  const effectiveBillingId = useMemo(
+    () => billingId ?? firstId,
+    [billingId, firstId]
+  );
+
+  /* FETCH: address list */
   useEffect(() => {
     dispatch(fetchAddressList());
   }, [dispatch]);
 
-  // Address list ilk yüklendiğinde defaultları oturt
+  /* INIT DEFAULT SELECTIONS (after list loads) */
   useEffect(() => {
     if (!firstId) return;
 
-    // shipping seçilmemişse ilk id’yi set et
     if (shippingId == null) setShippingId(firstId);
 
-    // billing seçilmemişse:
-    // - sameAsShipping ise shipping ile aynı
-    // - değilse ilk id
     if (billingId == null) {
-      setBillingId(sameAsShipping ? (shippingId ?? firstId) : firstId);
+      setBillingId(sameAsShipping ? shippingId ?? firstId : firstId);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [firstId]);
 
-  // sameAsShipping true ise billing her zaman shipping’i takip etsin
+  /* BILLING FOLLOWS SHIPPING (when enabled) */
   useEffect(() => {
-    if (sameAsShipping) {
-      if (effectiveShippingId != null) setBillingId(effectiveShippingId);
-    }
+    if (!sameAsShipping) return;
+    if (effectiveShippingId != null) setBillingId(effectiveShippingId);
   }, [sameAsShipping, effectiveShippingId]);
 
-  // Order Summary (checked ürünler)
+  /* ORDER SUMMARY (checked cart items) */
   const summary = useMemo(() => {
     const checked = cart.filter((i) => i.checked);
+
     const productsTotal = checked.reduce(
       (acc, i) => acc + Number(i.count || 0) * Number(i?.product?.price || 0),
       0
@@ -94,9 +103,16 @@ export default function CreateOrderAddressPage() {
     const discount = productsTotal > 150 ? 29.99 : 0;
     const grandTotal = productsTotal + shipping - discount;
 
-    return { checkedCount: checked.length, productsTotal, shipping, discount, grandTotal };
+    return {
+      checkedCount: checked.length,
+      productsTotal,
+      shipping,
+      discount,
+      grandTotal,
+    };
   }, [cart]);
 
+  /* FORM OPEN/CLOSE */
   const openCreate = () => {
     setEditing(null);
     setForm(emptyForm);
@@ -125,10 +141,11 @@ export default function CreateOrderAddressPage() {
     setForm(emptyForm);
   };
 
+  /* FORM SUBMIT (create / update) */
   const onSubmit = async (e) => {
     e.preventDefault();
 
-    // payload naming IMPORTANT (taskteki ile aynı)
+    /* API PAYLOAD (naming is important) */
     const payload = {
       title: form.title,
       name: form.name,
@@ -147,31 +164,35 @@ export default function CreateOrderAddressPage() {
       await dispatch(createAddress(payload));
     }
 
-    // Listeyi garanti refresh et
     await dispatch(fetchAddressList());
-
     closeForm();
   };
 
+  /* DELETE ADDRESS + FIX SELECTED IDS */
   const onDelete = async (id) => {
     await dispatch(deleteAddress(id));
     await dispatch(fetchAddressList());
 
-    // Seçili id silindiyse null'a düşür (useEffect default set eder)
     if (String(shippingId) === String(id)) setShippingId(null);
     if (String(billingId) === String(id)) setBillingId(null);
   };
 
+  /* PAGE GUARDS */
   const hasAddresses = addressList.length > 0;
-  const canProceed = summary.checkedCount > 0 && hasAddresses && effectiveShippingId != null;
+  const canProceed =
+    summary.checkedCount > 0 &&
+    hasAddresses &&
+    effectiveShippingId != null;
 
   return (
     <div className="w-full bg-white">
       <div className="w-full max-w-6xl mx-auto px-4 py-10">
-        {/* Top steps bar */}
+        {/* TOP STEPS BAR */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           <div className="border border-[#E6E6E6] rounded-[8px] p-4">
-            <div className="font-bold text-[#252B42]">1 — Address Information</div>
+            <div className="font-bold text-[#252B42]">
+              1 — Address Information
+            </div>
             <div className="text-[#737373] text-[14px] mt-1">
               Shipping & billing address
             </div>
@@ -182,34 +203,37 @@ export default function CreateOrderAddressPage() {
             <div className="text-[#737373] text-[14px] mt-1">Next task</div>
           </div>
 
+          {/* CTA: save & continue */}
           <div className="md:flex md:justify-end">
             <button
-  type="button"
-  className="w-full md:w-auto h-11 px-8 bg-[#E77C40] text-white font-bold rounded-[8px] disabled:opacity-50"
-  disabled={!canProceed}
-  onClick={() =>
-  navigate("/order/payment", {
-    state: {
-      shippingId: effectiveShippingId,
-      billingId: effectiveBillingId,
-      sameAsShipping,
-    },
-  })
-}
->
-  Save & Continue
-</button>
-
+              type="button"
+              className="w-full md:w-auto h-11 px-8 bg-[#E77C40] text-white font-bold rounded-[8px] disabled:opacity-50"
+              disabled={!canProceed}
+              onClick={() =>
+                navigate("/order/payment", {
+                  state: {
+                    shippingId: effectiveShippingId,
+                    billingId: effectiveBillingId,
+                    sameAsShipping,
+                  },
+                })
+              }
+            >
+              Save & Continue
+            </button>
           </div>
         </div>
 
+        {/* PAGE GRID: addresses + summary */}
         <div className="mt-8 grid grid-cols-1 lg:grid-cols-[1fr_360px] gap-8">
-          {/* LEFT */}
+          {/* LEFT: ADDRESS SELECTION */}
           <div className="border border-[#E6E6E6] rounded-[10px] p-6">
+            {/* header */}
             <div className="flex items-center justify-between">
               <h2 className="text-[20px] font-bold text-[#252B42]">
                 Delivery Address
               </h2>
+
               <button
                 type="button"
                 onClick={openCreate}
@@ -219,7 +243,7 @@ export default function CreateOrderAddressPage() {
               </button>
             </div>
 
-            {/* ✅ Same as shipping toggle (UI yoktu, eklendi) */}
+            {/* same as shipping toggle */}
             <div className="mt-4 flex items-center gap-2">
               <input
                 id="sameAsShipping"
@@ -228,6 +252,7 @@ export default function CreateOrderAddressPage() {
                 onChange={(e) => setSameAsShipping(e.target.checked)}
                 className="w-4 h-4 accent-[#23A6F0]"
               />
+
               <label
                 htmlFor="sameAsShipping"
                 className="text-[14px] text-[#737373]"
@@ -236,18 +261,20 @@ export default function CreateOrderAddressPage() {
               </label>
             </div>
 
-            {/* Empty state */}
+            {/* empty state */}
             {!hasAddresses && (
               <div className="mt-6 border border-dashed border-[#E6E6E6] rounded-[10px] p-6 text-[#737373]">
                 No address found. Please add an address to continue.
               </div>
             )}
 
-            {/* Shipping cards */}
+            {/* shipping cards */}
             {hasAddresses && (
               <div className="mt-6 grid grid-cols-1 md:grid-cols-2 gap-4">
                 {addressList.map((a) => {
-                  const selected = String(a.id) === String(effectiveShippingId);
+                  const selected =
+                    String(a.id) === String(effectiveShippingId);
+
                   return (
                     <div
                       key={a.id}
@@ -269,7 +296,9 @@ export default function CreateOrderAddressPage() {
                             }}
                             className="accent-[#E77C40]"
                           />
-                          <span className="font-bold text-[#252B42]">{a.title}</span>
+                          <span className="font-bold text-[#252B42]">
+                            {a.title}
+                          </span>
                         </label>
 
                         <div className="flex items-center gap-3">
@@ -280,6 +309,7 @@ export default function CreateOrderAddressPage() {
                           >
                             Edit
                           </button>
+
                           <button
                             type="button"
                             onClick={() => onDelete(a.id)}
@@ -305,7 +335,7 @@ export default function CreateOrderAddressPage() {
               </div>
             )}
 
-            {/* Billing cards (only if not same) */}
+            {/* billing cards (only if not same) */}
             {!sameAsShipping && hasAddresses && (
               <div className="mt-8">
                 <h2 className="text-[20px] font-bold text-[#252B42]">
@@ -314,7 +344,9 @@ export default function CreateOrderAddressPage() {
 
                 <div className="mt-4 grid grid-cols-1 md:grid-cols-2 gap-4">
                   {addressList.map((a) => {
-                    const selectedBill = String(a.id) === String(effectiveBillingId);
+                    const selectedBill =
+                      String(a.id) === String(effectiveBillingId);
+
                     return (
                       <div
                         key={`bill-${a.id}`}
@@ -332,7 +364,9 @@ export default function CreateOrderAddressPage() {
                             onChange={() => setBillingId(a.id)}
                             className="accent-[#23A6F0]"
                           />
-                          <span className="font-bold text-[#252B42]">{a.title}</span>
+                          <span className="font-bold text-[#252B42]">
+                            {a.title}
+                          </span>
                         </label>
 
                         <div className="mt-2 text-[#737373] text-[14px]">
@@ -351,13 +385,14 @@ export default function CreateOrderAddressPage() {
               </div>
             )}
 
-            {/* Form */}
+            {/* ADDRESS FORM */}
             {showForm && (
               <div className="mt-8 border-t border-[#E6E6E6] pt-6">
                 <div className="flex items-center justify-between">
                   <div className="font-bold text-[#252B42]">
                     {editing ? "Update Address" : "New Address"}
                   </div>
+
                   <button
                     type="button"
                     onClick={closeForm}
@@ -373,7 +408,9 @@ export default function CreateOrderAddressPage() {
                 >
                   <input
                     value={form.title}
-                    onChange={(e) => setForm((p) => ({ ...p, title: e.target.value }))}
+                    onChange={(e) =>
+                      setForm((p) => ({ ...p, title: e.target.value }))
+                    }
                     placeholder="Address Title"
                     className="h-11 px-4 border border-[#E6E6E6] rounded-[8px]"
                     required
@@ -381,7 +418,9 @@ export default function CreateOrderAddressPage() {
 
                   <input
                     value={form.phone}
-                    onChange={(e) => setForm((p) => ({ ...p, phone: e.target.value }))}
+                    onChange={(e) =>
+                      setForm((p) => ({ ...p, phone: e.target.value }))
+                    }
                     placeholder="Phone"
                     className="h-11 px-4 border border-[#E6E6E6] rounded-[8px]"
                     required
@@ -389,7 +428,9 @@ export default function CreateOrderAddressPage() {
 
                   <input
                     value={form.name}
-                    onChange={(e) => setForm((p) => ({ ...p, name: e.target.value }))}
+                    onChange={(e) =>
+                      setForm((p) => ({ ...p, name: e.target.value }))
+                    }
                     placeholder="Name"
                     className="h-11 px-4 border border-[#E6E6E6] rounded-[8px]"
                     required
@@ -407,7 +448,9 @@ export default function CreateOrderAddressPage() {
 
                   <select
                     value={form.city}
-                    onChange={(e) => setForm((p) => ({ ...p, city: e.target.value }))}
+                    onChange={(e) =>
+                      setForm((p) => ({ ...p, city: e.target.value }))
+                    }
                     className="h-11 px-4 border border-[#E6E6E6] rounded-[8px] bg-white"
                   >
                     {CITIES.map((c) => (
@@ -467,7 +510,7 @@ export default function CreateOrderAddressPage() {
             )}
           </div>
 
-          {/* RIGHT: Order Summary */}
+          {/* RIGHT: ORDER SUMMARY */}
           <div className="lg:sticky lg:top-6 h-fit">
             <div className="border border-[#E6E6E6] rounded-[10px] p-6">
               <div className="text-[20px] font-bold text-[#252B42]">
@@ -506,15 +549,15 @@ export default function CreateOrderAddressPage() {
                 </div>
               </div>
 
+              {/* CTA: currently navigates without state (left as-is) */}
               <button
-  type="button"
-  className="mt-6 w-full h-11 bg-[#E77C40] text-white font-bold rounded-[8px] disabled:opacity-50"
-  disabled={!canProceed}
-  onClick={() => navigate("/order/payment")}
->
-  Create Order
-</button>
-
+                type="button"
+                className="mt-6 w-full h-11 bg-[#E77C40] text-white font-bold rounded-[8px] disabled:opacity-50"
+                disabled={!canProceed}
+                onClick={() => navigate("/order/payment")}
+              >
+                Create Order
+              </button>
 
               <div className="mt-3 text-[12px] text-[#BDBDBD]">
                 (Button functionality next tasks)
@@ -532,12 +575,6 @@ export default function CreateOrderAddressPage() {
                 </div>
               )}
             </div>
-
-            {/* Debug info istersen açabiliriz:
-            <div className="mt-4 text-[12px] text-[#BDBDBD]">
-              ship:{String(effectiveShippingId)} bill:{String(effectiveBillingId)} same:{String(sameAsShipping)}
-            </div>
-            */}
           </div>
         </div>
       </div>

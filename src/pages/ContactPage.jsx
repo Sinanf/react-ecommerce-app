@@ -1,9 +1,9 @@
 // src/pages/ContactPage.jsx
-
 import { Link } from "react-router-dom";
 import { Twitter, Facebook, Instagram, Linkedin } from "lucide-react";
 import { contactHero, contactSocials } from "../data/contactPageData";
 
+/* SOCIAL ICON MAP */
 const iconMap = {
   Twitter,
   Facebook,
@@ -16,18 +16,19 @@ export default function ContactPage() {
     <div className="w-full bg-white">
       <section className="w-full">
         <div className="w-full max-w-6xl mx-auto px-4 py-20 md:py-24 flex flex-col items-center">
-          {/* Title */}
+          {/* PAGE HEADER */}
           <div className="w-full flex flex-col items-center">
+            {/* TITLE */}
             <h1 className="whitespace-pre-line text-center font-bold text-[40px] leading-[50px] tracking-[0.2px] text-[#252B42] md:text-[58px] md:leading-[80px]">
               {contactHero.title}
             </h1>
 
-            {/* Subtitle */}
+            {/* SUBTITLE */}
             <p className="mt-6 whitespace-pre-line text-center text-[20px] leading-[30px] tracking-[0.2px] text-[#737373] max-w-[520px]">
               {contactHero.subtitle}
             </p>
 
-            {/* CTA */}
+            {/* PRIMARY CTA */}
             <div className="mt-10 w-full flex flex-col items-center">
               <Link
                 to={contactHero.ctaHref}
@@ -37,10 +38,11 @@ export default function ContactPage() {
               </Link>
             </div>
 
-            {/* Social Icons */}
+            {/* SOCIAL LINKS */}
             <div className="mt-12 flex flex-row items-center justify-center gap-10 opacity-60">
               {contactSocials.map((s) => {
                 const Icon = iconMap[s.name];
+
                 return (
                   <a
                     key={s.id}

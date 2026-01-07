@@ -4,6 +4,7 @@ import { useDispatch } from "react-redux";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { loginUser } from "../store/actions/thunkActions";
 
+/* VALIDATION: basic email check */
 function isValidEmail(value) {
   return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value);
 }
@@ -13,9 +14,10 @@ export default function LoginPage() {
   const navigate = useNavigate();
   const location = useLocation();
 
-  // “previous page” mantığı (yoksa home)
+  /* REDIRECT: go back to previous page (fallback: home) */
   const from = location.state?.from?.pathname || "/";
 
+  /* FORM: react-hook-form setup */
   const {
     register,
     handleSubmit,
@@ -28,6 +30,7 @@ export default function LoginPage() {
     },
   });
 
+  /* SUBMIT: login + redirect */
   const onSubmit = async (values) => {
     const result = await dispatch(
       loginUser({
@@ -47,6 +50,7 @@ export default function LoginPage() {
     <div className="w-full flex flex-col bg-white">
       <section className="w-full">
         <div className="w-full max-w-2xl mx-auto px-4 py-12 flex flex-col gap-8">
+          {/* PAGE TITLE */}
           <div className="flex flex-col gap-2">
             <div className="font-bold text-[24px] leading-[32px] tracking-[0.1px] text-[#252B42]">
               Login
@@ -56,11 +60,12 @@ export default function LoginPage() {
             </div>
           </div>
 
+          {/* LOGIN FORM */}
           <form
             onSubmit={handleSubmit(onSubmit)}
             className="w-full flex flex-col gap-5"
           >
-            {/* Email */}
+            {/* EMAIL */}
             <div className="w-full flex flex-col gap-2">
               <label className="text-[14px] text-[#252B42] font-bold">
                 Email
@@ -80,7 +85,7 @@ export default function LoginPage() {
               )}
             </div>
 
-            {/* Password */}
+            {/* PASSWORD */}
             <div className="w-full flex flex-col gap-2">
               <label className="text-[14px] text-[#252B42] font-bold">
                 Password
@@ -98,13 +103,13 @@ export default function LoginPage() {
               )}
             </div>
 
-            {/* Remember me */}
+            {/* REMEMBER ME */}
             <label className="flex items-center gap-2 text-[14px] text-[#252B42]">
               <input type="checkbox" {...register("rememberMe")} />
               Remember me
             </label>
 
-            {/* Submit */}
+            {/* SUBMIT BUTTON */}
             <button
               type="submit"
               disabled={isSubmitting}
@@ -118,7 +123,7 @@ export default function LoginPage() {
               {isSubmitting ? "Logging in..." : "Login"}
             </button>
 
-            {/* Signup link */}
+            {/* SIGNUP LINK */}
             <div className="text-[14px] text-[#737373]">
               Don’t have an account?{" "}
               <Link to="/signup" className="text-[#23A6F0] font-bold">

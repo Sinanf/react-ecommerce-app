@@ -1,19 +1,23 @@
 // src/pages/PreviousOrdersPage.jsx
 import { useEffect, useMemo, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { fetchOrders, fetchProducts } from "../store/actions/thunkActions";
 import { useNavigate } from "react-router-dom";
+
+import { fetchOrders, fetchProducts } from "../store/actions/thunkActions";
 import { addToCart } from "../store/actions/cartActions";
 
-
+/* ----------------------------- Helpers: money/strings ----------------------------- */
 const money = (n) => `$${Number(n || 0).toFixed(2)}`;
 const onlyDigits = (s = "") => String(s).replace(/\D/g, "");
+
 const maskLast4 = (cardNo) => {
   const d = onlyDigits(cardNo);
   const last4 = d.slice(-4);
   return last4 ? `**** ${last4}` : "****";
 };
 
+/* ----------------------------- Helpers: normalize API shapes ----------------------------- */
+// Backend payload shape farklı gelebileceği için tek bir "okuma" katmanı kullanıyoruz.
 const getOrderId = (o) => o?.id ?? o?.order_id ?? "-";
 const getOrderDate = (o) => o?.order_date || o?.date || o?.created_at || "";
 const getOrderTotal = (o) => o?.price ?? o?.total ?? 0;
@@ -26,49 +30,47 @@ const getOrderProducts = (o) => {
 
 const getAddressId = (o) => o?.address_id ?? o?.address?.id ?? "-";
 
+/* ----------------------------- Helpers: product meta ----------------------------- */
 const getFirstImageFromProduct = (p) => {
-  const img =
-    p?.images?.[0]?.url ||
-    p?.images?.[0] ||
-    p?.image ||
-    p?.img ||
-    "";
+  const img = p?.images?.[0]?.url || p?.images?.[0] || p?.image || p?.img || "";
   return typeof img === "string" ? img : "";
 };
 
-const buildProductUrl = (product) => {
-  return `/product/${product?.id}`;
-};
+const buildProductUrl = (product) => `/product/${product?.id}`;
 
 export default function PreviousOrdersPage() {
   const dispatch = useDispatch();
   const navigate = useNavigate();
 
-
+  /* ----------------------------- Redux state ----------------------------- */
   const orders = useSelector((s) => s?.client?.orders || []);
   const fetchState = useSelector(
     (s) => s?.client?.ordersFetchState || "NOT_FETCHED"
   );
 
-  // Ürün isim/görsel için (varsa)
+  // Order items’ta product_id var → isim/görsel/price için product meta faydalı
   const productList = useSelector((s) => s?.product?.productList || []);
   const productFetchState = useSelector(
     (s) => s?.product?.productFetchState || "NOT_FETCHED"
   );
 
-  const [openMap, setOpenMap] = useState({}); // orderId -> bool
+  /* ----------------------------- Local UI state ----------------------------- */
+  // orderId -> details açık/kapalı
+  const [openMap, setOpenMap] = useState({});
 
+  /* ----------------------------- Initial data load ----------------------------- */
   useEffect(() => {
     dispatch(fetchOrders());
 
-    // Amazon benzeri görünüm için ürün meta (isim/görsel) faydalı.
-    // productList boşsa bir sayfa ürün çekelim (istenirse kaldırabilirsin).
+    // Amazon benzeri görünüm için ürün meta (isim/görsel) kullanıyoruz.
+    // productList boşsa tek seferde ürün çekiyoruz.
     if (!Array.isArray(productList) || productList.length === 0) {
       dispatch(fetchProducts());
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [dispatch]);
 
+  /* ----------------------------- Memo: products map ----------------------------- */
   const productById = useMemo(() => {
     const m = new Map();
     (productList || []).forEach((p) => {
@@ -77,19 +79,21 @@ export default function PreviousOrdersPage() {
     return m;
   }, [productList]);
 
-  const toggle = (orderId) => {
-    setOpenMap((prev) => ({ ...prev, [String(orderId)]: !prev[String(orderId)] }));
+  /* ----------------------------- UI handlers ----------------------------- */
+  const toggleDetails = (orderId) => {
+    setOpenMap((prev) => ({
+      ...prev,
+      [String(orderId)]: !prev[String(orderId)],
+    }));
   };
 
   return (
     <div className="w-full bg-white">
       <div className="w-full max-w-6xl mx-auto px-4 py-10">
-        {/* Header row */}
+        {/* HEADER */}
         <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-4">
           <div>
-            <h1 className="text-[28px] font-bold text-[#252B42]">
-              Your Orders
-            </h1>
+            <h1 className="text-[28px] font-bold text-[#252B42]">Your Orders</h1>
             <div className="text-[#737373] text-[14px] mt-1">
               Review, track, and manage your orders
             </div>
@@ -110,7 +114,7 @@ export default function PreviousOrdersPage() {
           </div>
         </div>
 
-        {/* States */}
+        {/* STATES */}
         {fetchState === "FETCHING" && (
           <div className="mt-6 border border-[#E6E6E6] rounded-[12px] p-6 text-[#737373]">
             Loading orders...
@@ -123,7 +127,7 @@ export default function PreviousOrdersPage() {
           </div>
         )}
 
-        {/* Orders list */}
+        {/* ORDERS LIST */}
         <div className="mt-6 space-y-4">
           {orders.map((o) => {
             const id = getOrderId(o);
@@ -145,11 +149,13 @@ export default function PreviousOrdersPage() {
                 key={String(id)}
                 className="border border-[#E6E6E6] rounded-[14px] overflow-hidden"
               >
-                {/* Amazon-like summary bar */}
+                {/* SUMMARY BAR */}
                 <div className="bg-[#F6F7F8] border-b border-[#E6E6E6] px-4 py-3">
                   <div className="grid grid-cols-2 md:grid-cols-5 gap-3 text-[12px]">
                     <div>
-                      <div className="text-[#737373] font-bold">ORDER PLACED</div>
+                      <div className="text-[#737373] font-bold">
+                        ORDER PLACED
+                      </div>
                       <div className="text-[#252B42]">{dateText}</div>
                     </div>
 
@@ -170,7 +176,9 @@ export default function PreviousOrdersPage() {
                     <div className="hidden md:block">
                       <div className="text-[#737373] font-bold">PAYMENT</div>
                       <div className="text-[#252B42]">
-                        {o?.card_name ? `${o.card_name} • ${maskLast4(o?.card_no)}` : "-"}
+                        {o?.card_name
+                          ? `${o.card_name} • ${maskLast4(o?.card_no)}`
+                          : "-"}
                       </div>
                     </div>
 
@@ -181,7 +189,7 @@ export default function PreviousOrdersPage() {
 
                         <button
                           type="button"
-                          onClick={() => toggle(id)}
+                          onClick={() => toggleDetails(id)}
                           className="mt-1 text-[#23A6F0] font-bold"
                         >
                           {isOpen ? "Hide details" : "View details"}
@@ -191,7 +199,7 @@ export default function PreviousOrdersPage() {
                   </div>
                 </div>
 
-                {/* Body */}
+                {/* BODY */}
                 <div className="px-4 py-4 bg-white">
                   <div className="flex items-center justify-between">
                     <div className="text-[14px] text-[#737373]">
@@ -199,11 +207,11 @@ export default function PreviousOrdersPage() {
                     </div>
 
                     <div className="text-[12px] text-[#BDBDBD]">
-                      {/* istersen burada status yazarsın */}
+                      {/* status placeholder */}
                     </div>
                   </div>
 
-                  {/* Collapsible details */}
+                  {/* DETAILS (COLLAPSIBLE) */}
                   {isOpen && (
                     <div className="mt-4">
                       <div className="text-[14px] font-bold text-[#252B42]">
@@ -220,8 +228,7 @@ export default function PreviousOrdersPage() {
                             const pid = p?.product_id ?? p?.id ?? "";
                             const count = Number(p?.count ?? p?.quantity ?? 0);
 
-                            const productMeta =
-                              productById.get(String(pid)) || null;
+                            const productMeta = productById.get(String(pid)) || null;
 
                             const name =
                               productMeta?.name ||
@@ -245,6 +252,7 @@ export default function PreviousOrdersPage() {
                                 key={`${id}-${idx}`}
                                 className="flex gap-4 border border-[#E6E6E6] rounded-[12px] p-3"
                               >
+                                {/* IMAGE */}
                                 <div className="w-[84px] h-[84px] rounded-[10px] overflow-hidden bg-[#FAFAFA] border border-[#E6E6E6] shrink-0">
                                   <img
                                     src={img}
@@ -253,6 +261,7 @@ export default function PreviousOrdersPage() {
                                   />
                                 </div>
 
+                                {/* META */}
                                 <div className="flex-1 min-w-0">
                                   <div className="flex items-start justify-between gap-3">
                                     <div className="min-w-0">
@@ -276,29 +285,29 @@ export default function PreviousOrdersPage() {
                                     </div>
                                   </div>
 
+                                  {/* ACTIONS */}
                                   <div className="mt-3 flex items-center gap-2">
-                                    {/* Amazon vibe action buttons (placeholder) */}
                                     <button
-  type="button"
-  onClick={() => {
-    if (!productMeta?.id) return;
-    dispatch(addToCart(productMeta));
-  }}
-  className="h-9 px-3 rounded-[10px] border border-[#E6E6E6] text-[#252B42] text-[13px] font-bold hover:bg-[#FAFAFA]"
->
-  Buy it again
-</button>
+                                      type="button"
+                                      onClick={() => {
+                                        if (!productMeta?.id) return;
+                                        dispatch(addToCart(productMeta));
+                                      }}
+                                      className="h-9 px-3 rounded-[10px] border border-[#E6E6E6] text-[#252B42] text-[13px] font-bold hover:bg-[#FAFAFA]"
+                                    >
+                                      Buy it again
+                                    </button>
 
-<button
-  type="button"
-  onClick={() => {
-    if (!productMeta?.id) return;
-    navigate(buildProductUrl(productMeta));
-  }}
-  className="h-9 px-3 rounded-[10px] border border-[#E6E6E6] text-[#252B42] text-[13px] font-bold hover:bg-[#FAFAFA]"
->
-  View product
-</button>
+                                    <button
+                                      type="button"
+                                      onClick={() => {
+                                        if (!productMeta?.id) return;
+                                        navigate(buildProductUrl(productMeta));
+                                      }}
+                                      className="h-9 px-3 rounded-[10px] border border-[#E6E6E6] text-[#252B42] text-[13px] font-bold hover:bg-[#FAFAFA]"
+                                    >
+                                      View product
+                                    </button>
                                   </div>
                                 </div>
                               </div>
@@ -314,6 +323,7 @@ export default function PreviousOrdersPage() {
           })}
         </div>
 
+        {/* ERROR */}
         {fetchState === "FAILED" && (
           <div className="mt-4 text-red-500 text-[13px]">
             Orders could not be loaded. Check auth token and Network tab.

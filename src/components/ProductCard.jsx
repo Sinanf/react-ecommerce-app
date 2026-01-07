@@ -9,10 +9,12 @@ export default function ProductCard({
   priceOld,
   priceNew,
   to,
-  variant = "default", // ✅ default | compact
+  variant = "default", // VARIANT: "default" | "compact"
 }) {
+  // LINK TARGET (explicit "to" wins, fallback uses id)
   const href = to || (id ? `/product/${id}` : "/product");
 
+  // LAYOUT MODE
   const isCompact = variant === "compact";
 
   return (
@@ -22,15 +24,11 @@ export default function ProductCard({
           isCompact ? "border border-[#F2F2F2]" : ""
         }`}
       >
-        {/* image */}
+        {/* IMAGE */}
         <div className="w-full">
           {isCompact ? (
             <div className="w-full h-[238px] overflow-hidden bg-[#F6F6F6]">
-              <img
-                src={img}
-                alt={title}
-                className="w-full h-full object-cover"
-              />
+              <img src={img} alt={title} className="w-full h-full object-cover" />
             </div>
           ) : (
             <img
@@ -41,29 +39,40 @@ export default function ProductCard({
           )}
         </div>
 
-        {/* content */}
+        {/* CONTENT */}
         <div
           className={`w-full flex flex-col ${
             isCompact ? "items-start px-4 py-4 gap-1" : "items-center px-6 py-6 gap-2"
           }`}
         >
+          {/* TITLE */}
           <div
             className={`font-bold text-[#252B42] ${
-              isCompact ? "text-[16px] leading-[24px]" : "text-[16px] leading-[24px] text-center"
+              isCompact
+                ? "text-[16px] leading-[24px]"
+                : "text-[16px] leading-[24px] text-center"
             }`}
           >
             {title}
           </div>
 
+          {/* DEPARTMENT */}
           <div
             className={`font-bold text-[#737373] ${
-              isCompact ? "text-[14px] leading-[24px]" : "text-[14px] leading-[24px] text-center"
+              isCompact
+                ? "text-[14px] leading-[24px]"
+                : "text-[14px] leading-[24px] text-center"
             }`}
           >
             {department}
           </div>
 
-          <div className={`flex flex-row items-center gap-[6px] ${isCompact ? "mt-2" : "py-[5px] px-[3px]"}`}>
+          {/* PRICES (old/new) */}
+          <div
+            className={`flex flex-row items-center gap-[6px] ${
+              isCompact ? "mt-2" : "py-[5px] px-[3px]"
+            }`}
+          >
             <div className="font-bold text-[16px] leading-[24px] tracking-[0.1px] text-[#BDBDBD]">
               {priceOld}
             </div>
@@ -72,7 +81,7 @@ export default function ProductCard({
             </div>
           </div>
 
-          {/* colors (Figma’da bestseller’da yok gibi; istersen compact’ta kapatalım) */}
+          {/* COLOR DOTS (default variant only) */}
           {!isCompact && (
             <div className="flex flex-row items-center gap-[6px]">
               <div className="w-4 h-4 rounded-full bg-[#23A6F0]" />

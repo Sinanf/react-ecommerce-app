@@ -2,6 +2,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { Link, useNavigate, useLocation } from "react-router-dom";
+
 import {
   fetchCardList,
   createCard,
@@ -12,6 +13,7 @@ import {
 } from "../store/actions/thunkActions";
 import { clearCart } from "../store/actions/cartActions";
 
+/* FORM DEFAULTS */
 const emptyForm = {
   id: null,
   card_no: "",
@@ -20,6 +22,7 @@ const emptyForm = {
   name_on_card: "",
 };
 
+/* CARD HELPERS */
 const onlyDigits = (s = "") => String(s).replace(/\D/g, "");
 
 const formatCardNo = (digits = "") => {
@@ -30,8 +33,7 @@ const formatCardNo = (digits = "") => {
 const maskCardNo = (digits = "") => {
   const d = onlyDigits(digits);
   if (!d) return "";
-  const last4 = d.slice(-4);
-  return `**** **** **** ${last4}`;
+  return `**** **** **** ${d.slice(-4)}`;
 };
 
 export default function CreateOrderPaymentPage() {
@@ -39,38 +41,37 @@ export default function CreateOrderPaymentPage() {
   const navigate = useNavigate();
   const location = useLocation();
 
-  // redux state
+  /* STORE STATE */
   const cards = useSelector((s) => s?.client?.creditCards || []);
   const addressList = useSelector((s) => s?.client?.addressList || []);
   const cart = useSelector((s) => s?.cart?.cart || []);
 
-  // location.state (Address page'den gelen)
+  /* NAV STATE (from address step) */
   const { shippingId, billingId: _billingId } = location.state || {};
 
-
-  // address_id fallback: shippingId varsa onu, yoksa ilk adres
+  /* ADDRESS FALLBACK (shippingId > first address) */
   const effectiveAddressId = shippingId ?? addressList?.[0]?.id ?? null;
 
-  // local UI state
+  /* LOCAL UI STATE */
   const [showForm, setShowForm] = useState(false);
   const [editing, setEditing] = useState(null);
   const [form, setForm] = useState(emptyForm);
 
   const [selectedCardId, setSelectedCardId] = useState(null);
 
-  // CCV order için (karta kaydedilmez)
+  /* CCV (not saved) */
   const [ccv, setCcv] = useState("");
 
-  // order başarılıysa aynı sayfada “Congrats”
+  /* ORDER RESULT STATE */
   const [orderOk, setOrderOk] = useState(false);
 
-  // load saved cards + addresses
+  /* LOAD: cards + addresses */
   useEffect(() => {
     dispatch(fetchCardList());
     dispatch(fetchAddressList());
   }, [dispatch]);
 
-  // default card selection
+  /* DEFAULT CARD SELECTION */
   const firstCardId = cards?.[0]?.id ?? null;
   const effectiveSelectedId = selectedCardId ?? firstCardId;
 
@@ -80,9 +81,10 @@ export default function CreateOrderPaymentPage() {
     );
   }, [cards, effectiveSelectedId]);
 
-  // Order Summary (checked ürünler)
+  /* ORDER SUMMARY (checked cart items) */
   const summary = useMemo(() => {
     const checked = cart.filter((i) => i.checked);
+
     const productsTotal = checked.reduce(
       (acc, i) => acc + Number(i.count || 0) * Number(i?.product?.price || 0),
       0
@@ -95,12 +97,14 @@ export default function CreateOrderPaymentPage() {
     return { productsTotal, shipping, discount, grandTotal, checked };
   }, [cart]);
 
+  /* SELECT OPTIONS */
   const months = useMemo(() => Array.from({ length: 12 }, (_, i) => i + 1), []);
   const years = useMemo(() => {
     const now = new Date().getFullYear();
     return Array.from({ length: 16 }, (_, i) => now + i);
   }, []);
 
+  /* FORM OPEN/CLOSE */
   const openCreate = () => {
     setEditing(null);
     setForm(emptyForm);
@@ -125,6 +129,7 @@ export default function CreateOrderPaymentPage() {
     setForm(emptyForm);
   };
 
+  /* FORM VALIDATION */
   const validateCardForm = () => {
     const cardDigits = onlyDigits(form.card_no);
     if (cardDigits.length !== 16) return "Kart numarası 16 haneli olmalı.";
@@ -140,6 +145,7 @@ export default function CreateOrderPaymentPage() {
     return null;
   };
 
+  /* CARD CREATE / UPDATE */
   const onSubmit = async (e) => {
     e.preventDefault();
 
@@ -163,17 +169,17 @@ export default function CreateOrderPaymentPage() {
     }
 
     closeForm();
-    // İstersen burada refresh de yapabilirsin ama fetchCardList zaten sayfa açılışında var
     dispatch(fetchCardList());
   };
 
+  /* CARD DELETE */
   const onDelete = async (cardId) => {
     await dispatch(deleteCard(cardId));
     if (String(selectedCardId) === String(cardId)) setSelectedCardId(null);
     dispatch(fetchCardList());
   };
 
-  // payment options (placeholder)
+  /* PAYMENT OPTIONS (placeholder) */
   const paymentOptions = useMemo(() => {
     const digits = onlyDigits(selectedCard?.card_no || "");
     const first = digits[0];
@@ -196,7 +202,7 @@ export default function CreateOrderPaymentPage() {
     ];
   }, [selectedCard]);
 
-  // T22 payload
+  /* T22: BUILD ORDER PAYLOAD */
   const buildOrderPayload = () => {
     const addrId = Number(effectiveAddressId);
 
@@ -227,6 +233,7 @@ export default function CreateOrderPaymentPage() {
     };
   };
 
+  /* PAY BUTTON GUARD */
   const canPay = useMemo(() => {
     if (!effectiveAddressId) return false;
     if (!selectedCard) return false;
@@ -246,18 +253,17 @@ export default function CreateOrderPaymentPage() {
     return true;
   }, [effectiveAddressId, selectedCard, summary.checked.length, ccv]);
 
+  /* PAY FLOW (T22) */
   const onPay = async () => {
     if (!canPay) return;
 
     const payload = buildOrderPayload();
-
     const res = await dispatch(createOrder(payload));
 
     if (res?.ok) {
       setOrderOk(true);
       dispatch(clearCart());
     } else {
-      // hata görünürlüğü için (istersen toast yaparsın)
       alert(res?.message || "Order oluşturulamadı. Console/Network kontrol et.");
     }
   };
@@ -265,7 +271,7 @@ export default function CreateOrderPaymentPage() {
   return (
     <div className="w-full bg-white">
       <div className="w-full max-w-6xl mx-auto px-4 py-10">
-        {/* Steps bar */}
+        {/* STEPS BAR */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           <div className="border border-[#E6E6E6] rounded-[8px] p-4 opacity-60">
             <div className="font-bold text-[#252B42]">
@@ -292,6 +298,7 @@ export default function CreateOrderPaymentPage() {
           </div>
         </div>
 
+        {/* SUCCESS STATE */}
         {orderOk && (
           <div className="mt-6 border border-[#E6E6E6] rounded-[10px] p-5 bg-[#F2FAFF]">
             <div className="font-bold text-[#252B42] text-[18px]">
@@ -300,6 +307,7 @@ export default function CreateOrderPaymentPage() {
             <div className="mt-2 text-[#737373] text-[14px]">
               Siparişiniz başarıyla oluşturuldu. Teşekkürler!
             </div>
+
             <div className="mt-4 flex gap-3">
               <button
                 type="button"
@@ -308,6 +316,7 @@ export default function CreateOrderPaymentPage() {
               >
                 Continue Shopping
               </button>
+
               <button
                 type="button"
                 onClick={() => navigate("/")}
@@ -319,9 +328,11 @@ export default function CreateOrderPaymentPage() {
           </div>
         )}
 
+        {/* PAGE GRID: payment + summary */}
         <div className="mt-8 grid grid-cols-1 lg:grid-cols-[1fr_360px] gap-8">
-          {/* LEFT */}
+          {/* LEFT: PAYMENT */}
           <div className="border border-[#E6E6E6] rounded-[10px] p-6">
+            {/* header */}
             <div className="flex items-center justify-between">
               <h2 className="text-[20px] font-bold text-[#252B42]">
                 Payment Method
@@ -345,7 +356,7 @@ export default function CreateOrderPaymentPage() {
               </div>
             </div>
 
-            {/* Saved cards */}
+            {/* SAVED CARDS */}
             <div className="mt-6">
               <div className="text-[16px] font-bold text-[#252B42]">
                 Saved Cards
@@ -359,7 +370,9 @@ export default function CreateOrderPaymentPage() {
               ) : (
                 <div className="mt-4 grid grid-cols-1 md:grid-cols-2 gap-4">
                   {cards.map((c) => {
-                    const selected = String(c.id) === String(effectiveSelectedId);
+                    const selected =
+                      String(c.id) === String(effectiveSelectedId);
+
                     return (
                       <div
                         key={c.id}
@@ -378,13 +391,16 @@ export default function CreateOrderPaymentPage() {
                               onChange={() => setSelectedCardId(c.id)}
                               className="mt-1 accent-[#23A6F0]"
                             />
+
                             <div>
                               <div className="font-bold text-[#252B42] text-[14px]">
                                 {c.name_on_card || "Card"}
                               </div>
+
                               <div className="text-[#737373] text-[13px] mt-1">
                                 {maskCardNo(c.card_no)}
                               </div>
+
                               <div className="text-[#737373] text-[13px] mt-1">
                                 Exp: {String(c.expire_month).padStart(2, "0")}/
                                 {c.expire_year}
@@ -400,6 +416,7 @@ export default function CreateOrderPaymentPage() {
                             >
                               Edit
                             </button>
+
                             <button
                               type="button"
                               onClick={() => onDelete(c.id)}
@@ -416,7 +433,7 @@ export default function CreateOrderPaymentPage() {
               )}
             </div>
 
-            {/* Payment options placeholder */}
+            {/* PAYMENT OPTIONS (placeholder) */}
             <div className="mt-8">
               <div className="text-[16px] font-bold text-[#252B42]">
                 Payment Options
@@ -441,13 +458,14 @@ export default function CreateOrderPaymentPage() {
               </div>
             </div>
 
-            {/* Form */}
+            {/* CARD FORM */}
             {showForm && (
               <div className="mt-8 border-t border-[#E6E6E6] pt-6">
                 <div className="flex items-center justify-between">
                   <div className="font-bold text-[#252B42]">
                     {editing ? "Update Card" : "New Card"}
                   </div>
+
                   <button
                     type="button"
                     onClick={closeForm}
@@ -538,7 +556,7 @@ export default function CreateOrderPaymentPage() {
             )}
           </div>
 
-          {/* RIGHT: Order Summary */}
+          {/* RIGHT: SUMMARY + PAY */}
           <div className="lg:sticky lg:top-6 h-fit">
             <div className="border border-[#E6E6E6] rounded-[10px] p-6">
               <div className="text-[20px] font-bold text-[#252B42]">
@@ -577,11 +595,12 @@ export default function CreateOrderPaymentPage() {
                 </div>
               </div>
 
-              {/* CCV */}
+              {/* CCV INPUT */}
               <div className="mt-5">
                 <label className="block text-[13px] text-[#737373] font-bold mb-2">
                   Card CCV
                 </label>
+
                 <input
                   value={onlyDigits(ccv).slice(0, 4)}
                   onChange={(e) => setCcv(onlyDigits(e.target.value))}
@@ -589,11 +608,13 @@ export default function CreateOrderPaymentPage() {
                   className="h-11 w-full px-4 border border-[#E6E6E6] rounded-[8px]"
                   inputMode="numeric"
                 />
+
                 <div className="mt-2 text-[12px] text-[#BDBDBD]">
                   (CCV kaydedilmez.)
                 </div>
               </div>
 
+              {/* PAY ACTION */}
               <button
                 type="button"
                 className="mt-6 w-full h-11 bg-[#E77C40] text-white font-bold rounded-[8px] disabled:opacity-60"
@@ -609,9 +630,7 @@ export default function CreateOrderPaymentPage() {
                 </div>
               )}
 
-              <div className="mt-3 text-[12px] text-[#BDBDBD]">
-                (T22: POST /order)
-              </div>
+          
             </div>
           </div>
         </div>

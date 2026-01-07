@@ -14,15 +14,17 @@ import {
   ChevronDown,
 } from "lucide-react";
 import { Link, NavLink, useLocation, useNavigate } from "react-router-dom";
-import { useSelector, useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { logoutUser, fetchCategoriesIfNeeded } from "../store/actions/thunkActions";
 
+/* NAV LINK STYLES */
 const navBaseMobile =
   "text-[30px] leading-[45px] tracking-[0.2px] text-[#737373]";
 const navBaseDesktop =
   "text-[14px] leading-[24px] tracking-[0.2px] text-[#737373]";
 const navActive = "text-[#252B42]";
 
+/* ROUTE HELPERS (TR slug + gender path) */
 const slugifyTr = (text = "") =>
   String(text)
     .toLowerCase()
@@ -44,37 +46,18 @@ const getCategorySlug = (c) => {
 };
 
 export default function Header() {
-
-  const navigate = useNavigate();
-const [userMenuOpen, setUserMenuOpen] = useState(false);
-const userMenuRef = useRef(null);
-
-useEffect(() => {
-  if (!userMenuOpen) return;
-
-  const onDown = (e) => {
-    const el = userMenuRef.current;
-    if (!el) return;
-    if (!el.contains(e.target)) setUserMenuOpen(false);
-  };
-
-  document.addEventListener("mousedown", onDown);
-  document.addEventListener("touchstart", onDown);
-  return () => {
-    document.removeEventListener("mousedown", onDown);
-    document.removeEventListener("touchstart", onDown);
-  };
-}, [userMenuOpen]);
-
-
-  const location = useLocation();
   const dispatch = useDispatch();
+  const navigate = useNavigate();
+  const location = useLocation();
 
+  /* AUTH STATE */
   const user = useSelector((s) => s?.client?.user || {});
   const isLoggedIn = Boolean(user?.email);
 
+  /* CATEGORY STATE (for Shop mega menu) */
   const categories = useSelector((s) => s?.product?.categories || []);
 
+  /* CART STATE */
   const cart = useSelector((s) => s?.cart?.cart || []);
   const cartCount = cart.reduce((acc, i) => acc + (i.count || 0), 0);
 
@@ -86,20 +69,47 @@ useEffect(() => {
     }, 0);
   }, [cart]);
 
-  const [cartOpen, setCartOpen] = useState(false);
-  const cartWrapRef = useRef(null);
-
+  /* UI STATE: MOBILE MENU */
   const [open, setOpen] = useState(false);
   const closeMenu = () => setOpen(false);
 
+  /* UI STATE: CART DROPDOWN */
+  const [cartOpen, setCartOpen] = useState(false);
+  const cartWrapRef = useRef(null);
+
+  /* UI STATE: USER MENU (desktop) */
+  const [userMenuOpen, setUserMenuOpen] = useState(false);
+  const userMenuRef = useRef(null);
+
+  /* NAVLINK CLASS HELPER */
   const navClass = (base) => ({ isActive }) =>
     `${base} ${isActive ? navActive : ""}`;
 
+  /* LOAD CATEGORIES (needed for Shop mega menu links) */
   useEffect(() => {
     dispatch(fetchCategoriesIfNeeded());
   }, [dispatch]);
 
-  // ✅ Dışarı tıklayınca dropdown kapan
+  /* CLOSE USER MENU ON OUTSIDE CLICK */
+  useEffect(() => {
+    if (!userMenuOpen) return;
+
+    const onDown = (e) => {
+      const el = userMenuRef.current;
+      if (!el) return;
+      if (!el.contains(e.target)) setUserMenuOpen(false);
+    };
+
+    document.addEventListener("mousedown", onDown);
+    document.addEventListener("touchstart", onDown);
+
+    return () => {
+      document.removeEventListener("mousedown", onDown);
+      document.removeEventListener("touchstart", onDown);
+    };
+  }, [userMenuOpen]);
+
+  /* CLOSE CART ON OUTSIDE CLICK */
   useEffect(() => {
     if (!cartOpen) return;
 
@@ -111,12 +121,14 @@ useEffect(() => {
 
     document.addEventListener("mousedown", onDown);
     document.addEventListener("touchstart", onDown);
+
     return () => {
       document.removeEventListener("mousedown", onDown);
       document.removeEventListener("touchstart", onDown);
     };
   }, [cartOpen]);
 
+  /* SHOP MEGA MENU DATA (women/men lists + promo image) */
   const { women, men, promoImg } = useMemo(() => {
     const womenList = categories.filter((c) => c.gender === "k");
     const menList = categories.filter((c) => c.gender === "e");
@@ -132,6 +144,7 @@ useEffect(() => {
     };
   }, [categories]);
 
+  /* SHOP CATEGORY LINK */
   const categoryLink = (c) =>
     `/shop/${genderToPath(c.gender)}/${getCategorySlug(c)}/${c.id}`;
 
@@ -168,6 +181,7 @@ useEffect(() => {
       {/* MAIN HEADER */}
       <div className="w-full border-b border-[#E6E6E6]">
         <div className="w-full max-w-6xl mx-auto px-4 py-4 flex flex-row items-center justify-between">
+          {/* BRAND */}
           <Link
             to="/"
             className="font-bold text-[24px] leading-[32px] tracking-[0.1px] text-[#252B42]"
@@ -179,9 +193,9 @@ useEffect(() => {
             Bandage
           </Link>
 
-          {/* Desktop nav */}
+          {/* DESKTOP NAV */}
           <nav className="hidden md:flex flex-row items-center gap-6">
-            {/* HOME */}
+            {/* HOME (with Team dropdown) */}
             <div className="relative group">
               <NavLink
                 to="/"
@@ -195,7 +209,6 @@ useEffect(() => {
               </NavLink>
 
               <div className="hidden group-hover:block absolute left-0 top-full h-2 w-full" />
-
               <div className="hidden group-hover:flex absolute left-0 top-full flex-col bg-white border border-[#E6E6E6] rounded-[6px] py-2 min-w-[200px] z-50">
                 <NavLink
                   to="/team"
@@ -211,7 +224,7 @@ useEffect(() => {
               </div>
             </div>
 
-            {/* SHOP */}
+            {/* SHOP (mega menu) */}
             <div className="relative group">
               <NavLink
                 to="/shop"
@@ -230,10 +243,10 @@ useEffect(() => {
               </NavLink>
 
               <div className="hidden group-hover:block absolute left-0 top-full h-2 w-full" />
-
               <div className="hidden group-hover:block absolute left-1/2 -translate-x-1/2 top-full z-50">
                 <div className="mt-2 w-[720px] bg-white border border-[#E6E6E6] rounded-[6px] shadow-sm overflow-hidden">
                   <div className="grid grid-cols-3">
+                    {/* WOMEN */}
                     <div className="p-6">
                       <div className="font-bold text-[16px] text-[#252B42] mb-3">
                         Kadın
@@ -261,6 +274,7 @@ useEffect(() => {
                       </div>
                     </div>
 
+                    {/* MEN */}
                     <div className="p-6 border-l border-[#E6E6E6]">
                       <div className="font-bold text-[16px] text-[#252B42] mb-3">
                         Erkek
@@ -288,6 +302,7 @@ useEffect(() => {
                       </div>
                     </div>
 
+                    {/* PROMO */}
                     <div className="relative border-l border-[#E6E6E6]">
                       {promoImg ? (
                         <img
@@ -298,7 +313,9 @@ useEffect(() => {
                       ) : (
                         <div className="w-full h-full bg-[#FAFAFA]" />
                       )}
+
                       <div className="absolute inset-0 bg-black/10" />
+
                       <div className="absolute bottom-4 left-4 right-4">
                         <div className="text-white font-bold text-[16px] leading-[24px]">
                           New Collection
@@ -317,6 +334,7 @@ useEffect(() => {
               </div>
             </div>
 
+            {/* STATIC PAGES */}
             <NavLink
               to="/about"
               onClick={() => {
@@ -351,101 +369,110 @@ useEffect(() => {
             </NavLink>
           </nav>
 
+          {/* RIGHT ACTIONS */}
           <div className="flex flex-row items-center gap-4">
+            {/* USER (desktop) */}
             {isLoggedIn ? (
-  <div
-    className="hidden md:flex items-center gap-3 text-[14px] text-[#252B42] relative"
-    ref={userMenuRef}
-  >
-    {user?.gravatarUrl ? (
-      <img
-        src={user.gravatarUrl}
-        alt="avatar"
-        className="w-8 h-8 rounded-full border border-[#E6E6E6]"
-        referrerPolicy="no-referrer"
-      />
-    ) : (
-      <div className="w-8 h-8 rounded-full bg-[#E6E6E6]" />
-    )}
+              <div
+                ref={userMenuRef}
+                className="hidden md:flex items-center gap-3 text-[14px] text-[#252B42] relative"
+              >
+                {user?.gravatarUrl ? (
+                  <img
+                    src={user.gravatarUrl}
+                    alt="avatar"
+                    className="w-8 h-8 rounded-full border border-[#E6E6E6]"
+                    referrerPolicy="no-referrer"
+                  />
+                ) : (
+                  <div className="w-8 h-8 rounded-full bg-[#E6E6E6]" />
+                )}
 
-    <button
-      type="button"
-      onClick={() => setUserMenuOpen((v) => !v)}
-      className="flex items-center gap-2 font-bold"
-    >
-      <span className="max-w-[160px] truncate">{user?.name || user?.email}</span>
-      <ChevronDown className="w-4 h-4" />
-    </button>
+                <button
+                  type="button"
+                  onClick={() => setUserMenuOpen((v) => !v)}
+                  className="flex items-center gap-2 font-bold"
+                >
+                  <span className="max-w-[160px] truncate">
+                    {user?.name || user?.email}
+                  </span>
+                  <ChevronDown className="w-4 h-4" />
+                </button>
 
-    {userMenuOpen && (
-      <div className="absolute right-0 top-full mt-3 w-[200px] bg-white border border-[#E6E6E6] rounded-[10px] shadow-lg z-50 overflow-hidden">
-        <button
-          type="button"
-          onClick={() => {
-            setUserMenuOpen(false);
-            setCartOpen(false);
-            navigate("/orders");
-          }}
-          className="w-full text-left px-4 py-3 text-[14px] text-[#252B42] hover:bg-[#FAFAFA] font-bold"
-        >
-          Previous Orders
-        </button>
+                {userMenuOpen && (
+                  <div className="absolute right-0 top-full mt-3 w-[200px] bg-white border border-[#E6E6E6] rounded-[10px] shadow-lg z-50 overflow-hidden">
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setUserMenuOpen(false);
+                        setCartOpen(false);
+                        navigate("/orders");
+                      }}
+                      className="w-full text-left px-4 py-3 text-[14px] text-[#252B42] hover:bg-[#FAFAFA] font-bold"
+                    >
+                      Previous Orders
+                    </button>
 
-        <div className="h-px bg-[#E6E6E6]" />
+                    <div className="h-px bg-[#E6E6E6]" />
 
-        <button
-          type="button"
-          onClick={() => {
-            setUserMenuOpen(false);
-            dispatch(logoutUser());
-          }}
-          className="w-full text-left px-4 py-3 text-[14px] text-[#23A6F0] hover:bg-[#FAFAFA] font-bold"
-        >
-          Logout
-        </button>
-      </div>
-    )}
-  </div>
-) : (
-  <div className="hidden md:flex items-center gap-2 text-[14px] leading-[24px] tracking-[0.2px] text-[#23A6F0]">
-    <Settings className="w-4 h-4" />
-    <Link
-      to="/login"
-      state={{ from: location }}
-      className="font-bold hover:underline underline-offset-4"
-      onClick={() => setCartOpen(false)}
-    >
-      Login
-    </Link>
-    <span>/</span>
-    <Link
-      to="/signup"
-      state={{ from: location }}
-      className="font-bold hover:underline underline-offset-4"
-      onClick={() => setCartOpen(false)}
-    >
-      Register
-    </Link>
-  </div>
-)}
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setUserMenuOpen(false);
+                        dispatch(logoutUser());
+                      }}
+                      className="w-full text-left px-4 py-3 text-[14px] text-[#23A6F0] hover:bg-[#FAFAFA] font-bold"
+                    >
+                      Logout
+                    </button>
+                  </div>
+                )}
+              </div>
+            ) : (
+              <div className="hidden md:flex items-center gap-2 text-[14px] leading-[24px] tracking-[0.2px] text-[#23A6F0]">
+                <Settings className="w-4 h-4" />
 
+                <Link
+                  to="/login"
+                  state={{ from: location }}
+                  className="font-bold hover:underline underline-offset-4"
+                  onClick={() => setCartOpen(false)}
+                >
+                  Login
+                </Link>
 
+                <span>/</span>
+
+                <Link
+                  to="/signup"
+                  state={{ from: location }}
+                  className="font-bold hover:underline underline-offset-4"
+                  onClick={() => setCartOpen(false)}
+                >
+                  Register
+                </Link>
+              </div>
+            )}
+
+            {/* SEARCH (UI only) */}
             <button className="p-1" aria-label="Search">
               <Search className="w-5 h-5 text-[#23A6F0]" />
             </button>
 
-            {/* ✅ key: route değişince bu subtree remount olur, cartOpen default false */}
+            {/* CART (route change remounts subtree via key) */}
             <div className="relative" ref={cartWrapRef} key={location.pathname}>
               <button
                 type="button"
-                className="p-1 flex flex-row items-center gap-1"
                 aria-label="Cart"
                 onClick={() => setCartOpen((v) => !v)}
+                className="p-1 flex flex-row items-center gap-1"
               >
                 <ShoppingCart className="w-5 h-5 text-[#23A6F0]" />
+
                 <span className="hidden md:inline text-[12px] text-[#23A6F0] font-bold">
                   {cartCount}
                 </span>
+
                 {cartCount > 0 && (
                   <span className="absolute -top-1 -right-1 min-w-[18px] h-[18px] px-1 rounded-full bg-red-500 text-white text-[11px] leading-[18px] text-center">
                     {cartCount}
@@ -455,6 +482,7 @@ useEffect(() => {
 
               {cartOpen && (
                 <div className="absolute right-0 mt-3 w-[320px] bg-white border border-[#E6E6E6] rounded-[10px] shadow-lg z-50 overflow-hidden">
+                  {/* CART HEADER */}
                   <div className="px-4 py-3 border-b border-[#E6E6E6] flex items-center justify-between">
                     <div className="font-bold text-[#252B42] text-[14px]">
                       Shopping Cart ({cartCount})
@@ -468,6 +496,7 @@ useEffect(() => {
                     </button>
                   </div>
 
+                  {/* CART ITEMS */}
                   <div className="max-h-[320px] overflow-y-auto">
                     {cart.length === 0 ? (
                       <div className="px-4 py-6 text-[#737373] text-[14px]">
@@ -517,6 +546,7 @@ useEffect(() => {
                     )}
                   </div>
 
+                  {/* CART FOOTER */}
                   <div className="px-4 py-3 border-t border-[#E6E6E6]">
                     <div className="flex items-center justify-between text-[14px]">
                       <span className="text-[#737373]">Total</span>
@@ -547,6 +577,7 @@ useEffect(() => {
               )}
             </div>
 
+            {/* MOBILE MENU BUTTON */}
             <button
               className="p-1 md:hidden"
               aria-label="Menu"
@@ -558,33 +589,54 @@ useEffect(() => {
         </div>
       </div>
 
-      {/* Mobile menu (aynı) */}
+      {/* MOBILE MENU */}
       {open && (
         <nav className="w-full flex flex-col items-center justify-center gap-[30px] py-8 md:hidden">
           <NavLink to="/" onClick={closeMenu} className={navClass(navBaseMobile)}>
             Home
           </NavLink>
 
-          <NavLink to="/shop" onClick={closeMenu} className={navClass(navBaseMobile)}>
+          <NavLink
+            to="/shop"
+            onClick={closeMenu}
+            className={navClass(navBaseMobile)}
+          >
             Shop
           </NavLink>
 
-          <NavLink to="/about" onClick={closeMenu} className={navClass(navBaseMobile)}>
+          <NavLink
+            to="/about"
+            onClick={closeMenu}
+            className={navClass(navBaseMobile)}
+          >
             About
           </NavLink>
 
-          <NavLink to="/blog/1" onClick={closeMenu} className={navClass(navBaseMobile)}>
+          <NavLink
+            to="/blog/1"
+            onClick={closeMenu}
+            className={navClass(navBaseMobile)}
+          >
             Blog
           </NavLink>
 
-          <NavLink to="/team" onClick={closeMenu} className={navClass(navBaseMobile)}>
+          <NavLink
+            to="/team"
+            onClick={closeMenu}
+            className={navClass(navBaseMobile)}
+          >
             Team
           </NavLink>
 
-          <NavLink to="/contact" onClick={closeMenu} className={navClass(navBaseMobile)}>
+          <NavLink
+            to="/contact"
+            onClick={closeMenu}
+            className={navClass(navBaseMobile)}
+          >
             Contact
           </NavLink>
 
+          {/* AUTH (mobile) */}
           {!isLoggedIn ? (
             <>
               <Link
@@ -614,19 +666,21 @@ useEffect(() => {
                   referrerPolicy="no-referrer"
                 />
               )}
+
               <div className="text-[18px] text-[#252B42] font-bold">
                 {user?.name || user?.email}
               </div>
+
               <NavLink
-  to="/orders"
-  onClick={() => {
-    closeMenu();
-    setCartOpen(false);
-  }}
-  className={navBaseMobile}
->
-  Previous Orders
-</NavLink>
+                to="/orders"
+                onClick={() => {
+                  closeMenu();
+                  setCartOpen(false);
+                }}
+                className={navBaseMobile}
+              >
+                Previous Orders
+              </NavLink>
 
               <button
                 type="button"
