@@ -28,9 +28,9 @@ export const vitaClassicSlides = [
 
 export const editorsPick = {
   men: "/assets/homepage/media-bg-cover.png",
-  women: "/assets/homepage/card-cover-20.jpg",
-  accessories: "/assets/homepage/card-cover-22-1.jpg",
-  kids: "/assets/homepage/card-cover-23.jpg",
+  women: "/assets/homepage/women-vertical.jpg",
+  accessories: "/assets/homepage/accessories.jpg",
+  kids: "/assets/homepage/kid.jpg",
 };
 
 const productImgs = [
@@ -50,7 +50,7 @@ export const bestsellerProducts = Array.from({ length: 8 }).map((_, i) => ({
 }));
 
 export const neuralUniverse = {
-  img: "/assets/homepage/card-cover-23.jpg",
+  img: "/assets/homepage/rh_women.jpg",
   season: "SUMMER 2020",
   title: "Part of the Neural Universe",
   desc: "We know how large objects will act, but things on a small scale.",
@@ -77,7 +77,7 @@ export const featuredPosts = [
   },
   {
     id: "post-3",
-    img: "/assets/homepage/unsplash_Bd7gNnWJBkU.jpg",
+    img: "/assets/homepage/rh_women.jpg",
     title: "Loudest à la Madison #1",
     desc: "We focus on ergonomics and meeting you where you work. It's only a keystroke away.",
     href: "/blog/3",

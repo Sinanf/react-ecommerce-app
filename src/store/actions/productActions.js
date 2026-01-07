@@ -24,3 +24,12 @@ export const setSort = (sort) => ({ type: SET_SORT, payload: sort });
 
 export const setProductFetchState = (fetchState) => ({ type: SET_PRODUCT_FETCH_STATE, payload: fetchState });
 export const setProduct = (product) => ({ type: SET_PRODUCT, payload: product });
+
+// ✅ HOME (Homepage Bestsellers)
+export const SET_HOME_PRODUCT_LIST = "product/SET_HOME_PRODUCT_LIST";
+export const SET_HOME_TOTAL = "product/SET_HOME_TOTAL";
+export const SET_HOME_PRODUCT_FETCH_STATE = "product/SET_HOME_PRODUCT_FETCH_STATE";
+
+export const setHomeProductList = (list) => ({ type: SET_HOME_PRODUCT_LIST, payload: list });
+export const setHomeTotal = (total) => ({ type: SET_HOME_TOTAL, payload: total });
+export const setHomeProductFetchState = (state) => ({ type: SET_HOME_PRODUCT_FETCH_STATE, payload: state });

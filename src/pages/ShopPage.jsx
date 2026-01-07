@@ -78,21 +78,21 @@ export default function ShopPage() {
   }, [dispatch, categoryId, filter, sort]);
 
   // ✅ categoryId değişince, seçili kategorinin hangi sayfada olduğunu bul
-useEffect(() => {
-  if (!categoryId || categories.length === 0) return;
+  useEffect(() => {
+    if (!categoryId || categories.length === 0) return;
 
-  const idx = categories.findIndex((c) => String(c.id) === String(categoryId));
-  if (idx < 0) return;
+    const idx = categories.findIndex((c) => String(c.id) === String(categoryId));
+    if (idx < 0) return;
 
-  const targetPage = Math.floor(idx / ITEMS_PER_PAGE);
+    const targetPage = Math.floor(idx / ITEMS_PER_PAGE);
 
-  // ✅ React'in "effect içinde senkron setState" uyarısını engellemek için async yapıyoruz
-  const t = setTimeout(() => {
-    setCatPage((prev) => (prev === targetPage ? prev : targetPage));
-  }, 0);
+    // ✅ React'in "effect içinde senkron setState" uyarısını engellemek için async yapıyoruz
+    const t = setTimeout(() => {
+      setCatPage((prev) => (prev === targetPage ? prev : targetPage));
+    }, 0);
 
-  return () => clearTimeout(t);
-}, [categoryId, categories]);
+    return () => clearTimeout(t);
+  }, [categoryId, categories]);
 
   const isLoadingCategories =
     categoryFetchState === "FETCHING" && categories.length === 0;
@@ -231,9 +231,8 @@ useEffect(() => {
                     key={i}
                     type="button"
                     onClick={() => setCatPage(i)}
-                    className={`w-2.5 h-2.5 rounded-full ${
-                      i === catPage ? "bg-[#23A6F0]" : "bg-[#E6E6E6]"
-                    }`}
+                    className={`w-2.5 h-2.5 rounded-full ${i === catPage ? "bg-[#23A6F0]" : "bg-[#E6E6E6]"
+                      }`}
                     aria-label={`Go to category page ${i + 1}`}
                   />
                 ))}
@@ -293,29 +292,29 @@ useEffect(() => {
           ) : (
             <div className="flex flex-row flex-wrap justify-center gap-6">
               {productList.map((p) => {
-  const firstImg = p?.images?.[0]?.url;
+                const firstImg = p?.images?.[0]?.url;
 
-  const cat = categories.find((c) => Number(c.id) === Number(p.category_id));
-  const gender = genderPath(cat?.gender);
-  const categoryName = slugifyTr(cat?.code?.split(":")?.[1] || cat?.title || "kategori");
-  const productNameSlug = slugifyTr(p?.name || "urun");
+                const cat = categories.find((c) => Number(c.id) === Number(p.category_id));
+                const gender = genderPath(cat?.gender);
+                const categoryName = slugifyTr(cat?.code?.split(":")?.[1] || cat?.title || "kategori");
+                const productNameSlug = slugifyTr(p?.name || "urun");
 
-  const to = `/shop/${gender}/${categoryName}/${p.category_id}/${productNameSlug}/${p.id}`;
+                const to = `/shop/${gender}/${categoryName}/${p.category_id}/${productNameSlug}/${p.id}`;
 
-  return (
-    <div key={p.id} className="w-full md:w-[calc(25%-18px)] flex">
-      <ProductCard
-        id={p.id}
-        to={to}
-        img={firstImg || "https://picsum.photos/800/900?random=1"}
-        title={p.name}
-        department="English Department"
-        priceOld={`$${(Number(p.price) * 1.25).toFixed(2)}`}
-        priceNew={`$${Number(p.price).toFixed(2)}`}
-      />
-    </div>
-  );
-})}
+                return (
+                  <div key={p.id} className="w-full md:w-[calc(25%-18px)] flex">
+                    <ProductCard
+                      id={p.id}
+                      to={to}
+                      img={firstImg || "https://picsum.photos/800/900?random=1"}
+                      title={p.name}
+                      department="English Department"
+                      priceOld={`$${(Number(p.price) * 1.25).toFixed(2)}`}
+                      priceNew={`$${Number(p.price).toFixed(2)}`}
+                    />
+                  </div>
+                );
+              })}
 
             </div>
           )}

@@ -8,11 +8,11 @@ export default function Footer() {
       {/* BRAND STRIP */}
       <div className="w-full border-b border-[#E6E6E6]">
         <div className="max-w-6xl mx-auto px-4 py-10 flex flex-wrap items-center justify-center gap-10 opacity-60">
-          <img src="/assets/homepage/fa-brands-1.png" alt="hooli" className="h-8" />
-          <img src="/assets/homepage/fa-brands-2.png" alt="lyft" className="h-8" />
-          <img src="/assets/homepage/fa-brands-4.png" alt="stripe" className="h-8" />
-          <img src="/assets/homepage/fa-brands-5.png" alt="aws" className="h-8" />
-          <img src="/assets/homepage/fa-brands-3.png" alt="reddit" className="h-8" />
+          <img src="/assets/logo/hooli.png" alt="hooli" className="h-8" />
+          <img src="/assets/logo/lyft.png" alt="lyft" className="h-8" />
+          <img src="/assets/logo/stripe.png" alt="stripe" className="h-8" />
+          <img src="/assets/logo/aws.png" alt="aws" className="h-8" />
+          <img src="/assets/logo/robinhood.png" alt="robinhood" className="h-8" />
         </div>
       </div>
       

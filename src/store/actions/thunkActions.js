@@ -11,6 +11,9 @@ import {
   setTotal,
   setProductFetchState,
   setProduct,
+  setHomeProductList,
+  setHomeTotal,
+  setHomeProductFetchState,
 } from "./productActions";
 
 /* --------------------------------------------------
@@ -420,5 +423,33 @@ export const fetchOrders = () => async (dispatch) => {
     toast.error(err?.response?.data?.message || "Orders could not be loaded");
     console.error("fetchOrders error:", err);
     return { ok: false, error: err };
+  }
+};
+
+// ✅ HOME — Bestsellers (Shop state'ini BOZMADAN)
+export const fetchHomepageBestsellers = () => async (dispatch) => {
+  try {
+    dispatch(setHomeProductFetchState("FETCHING"));
+
+    const params = new URLSearchParams();
+    params.set("limit", "8");
+    params.set("sort", "rating:desc"); // backend destekliyorsa
+
+    const res = await api.get(`/products?${params.toString()}`);
+
+    const data = res?.data || {};
+    const total = Number(data?.total || 0);
+    const products = Array.isArray(data?.products) ? data.products : [];
+
+    dispatch(setHomeTotal(total));
+    dispatch(setHomeProductList(products));
+
+    dispatch(setHomeProductFetchState("FETCHED"));
+    return { ok: true, products };
+  } catch (err) {
+    dispatch(setHomeProductFetchState("FAILED"));
+    toast.error("Homepage products could not be loaded");
+    console.error("fetchHomepageBestsellers error:", err);
+    return { ok: false };
   }
 };

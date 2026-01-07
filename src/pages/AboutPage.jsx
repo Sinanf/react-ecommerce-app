@@ -151,41 +151,60 @@ export default function AboutPage() {
 
       {/* WORK WITH US */}
       <section className="w-full">
-        <div className="w-full flex flex-col md:flex-row">
-          {/* left blue */}
-          <div className="w-full md:w-1/2 bg-[#2A7CC7] flex">
-            <div className="w-full max-w-6xl mx-auto px-6 py-16 flex flex-col items-start gap-4">
-              <div className="font-bold text-[16px] leading-[24px] tracking-[0.1px] text-white">
-                {workWithUs.kicker}
+        <div className="w-full">
+          <div className="w-full max-w-6xl mx-auto px-4 py-12">
+            <div className="w-full rounded-[16px] overflow-hidden border border-[#E6E6E6] bg-white md:flex">
+              {/* left */}
+              <div className="w-full md:w-1/2 bg-[#2A7CC7] ">
+                <div className="h-full px-6 py-14 md:px-10 md:py-24 flex flex-col items-start gap-4 ">
+                  <div className="font-bold text-[14px] leading-[24px] tracking-[0.2px] text-white/90 ">
+                    {workWithUs.kicker}
+                  </div>
+
+                  <div className="font-bold text-[32px] leading-[40px] md:text-[40px] md:leading-[50px] tracking-[0.2px] text-white">
+                    {workWithUs.title}
+                  </div>
+
+                  <div className="text-[14px] leading-[20px] tracking-[0.2px] text-white/80 max-w-[420px]">
+                    {workWithUs.desc}
+                  </div>
+
+                  <Link
+                    to={workWithUs.buttonHref}
+                    className="mt-3 inline-flex items-center justify-center h-11 px-8 rounded-[8px]
+                         border border-white text-white font-bold text-[14px] leading-[22px] tracking-[0.2px]
+                         hover:bg-white hover:text-[#2A7CC7] transition-colors
+                         focus:outline-none focus:ring-2 focus:ring-white/50"
+                  > Work With Us
+
+                  </Link>
+                </div>
               </div>
 
-              <div className="font-bold text-[40px] leading-[50px] tracking-[0.2px] text-white">
-                {workWithUs.title}
-              </div>
+              {/* right image */}
+              <div className="w-full md:w-1/2 relative">
+                <img
+                  src={workWithUs.img}
+                  alt="Work with us"
+                  className="w-full h-[320px] md:h-[520px] object-cover"
+                  loading="lazy"
+                />
 
-              <div className="text-[14px] leading-[20px] tracking-[0.2px] text-white/80 max-w-[420px]">
-                {workWithUs.desc}
-              </div>
+                {/* ✅ okunurluk + premium look */}
+                <div className="absolute inset-0 bg-gradient-to-r from-black/25 via-black/10 to-transparent md:from-black/10 md:via-transparent" />
 
-              <Link
-                to={workWithUs.buttonHref}
-                className="mt-2 border border-white text-white font-bold text-[14px] leading-[22px] tracking-[0.2px] rounded-[5px] px-10 py-3"
-              >
-                {workWithUs.button}
-              </Link>
+                {/* küçük badge (opsiyonel ama güzel duruyor) */}
+                <div className="absolute left-4 top-4 md:left-6 md:top-6">
+                  <div className="px-3 py-1 rounded-full bg-white/90 text-[#252B42] text-[12px] font-bold border border-white/60">
+                    Join the team
+                  </div>
+                </div>
+              </div>
             </div>
-          </div>
-
-          {/* right image */}
-          <div className="w-full md:w-1/2 flex">
-            <img
-              src={workWithUs.img}
-              alt="Work with us"
-              className="w-full h-[320px] md:h-[520px] object-cover"
-            />
           </div>
         </div>
       </section>
+
 
       {/* BIG COMPANIES */}
       <section className="w-full">

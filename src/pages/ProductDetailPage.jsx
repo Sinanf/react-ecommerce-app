@@ -83,10 +83,10 @@ function ProductDetailContent({ productId }) {
             {/* TOP */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-10 items-start">
               {/* LEFT gallery */}
-              <div className="w-full">
+              <div className="w-full h-full">
                 {/* ✅ sabit height => sayfayı kaplamasın */}
                 <div className="relative w-full rounded-[6px] overflow-hidden border border-[#E6E6E6] bg-[#F6F6F6]">
-                  <div className="w-full h-[340px] md:h-[450px]">
+                  <div className="w-full h-[340px] md:h-[750px]">
                     <img
                       src={activeImg || "https://picsum.photos/1200/900?random=1"}
                       alt={product.name}
@@ -126,9 +126,8 @@ function ProductDetailContent({ productId }) {
                           key={`${im?.url}-${idx}`}
                           type="button"
                           onClick={() => setActiveImgIdx(idx)}
-                          className={`w-[100px] h-[75px] border rounded-[4px] overflow-hidden ${
-                            isActive ? "border-[#23A6F0]" : "border-[#E6E6E6]"
-                          }`}
+                          className={`w-[100px] h-[75px] border rounded-[4px] overflow-hidden ${isActive ? "border-[#23A6F0]" : "border-[#E6E6E6]"
+                            }`}
                         >
                           <img
                             src={im?.url}
@@ -190,16 +189,16 @@ function ProductDetailContent({ productId }) {
                     className="w-11 h-11 rounded-full border border-[#E6E6E6] flex items-center justify-center"
                     aria-label="Favorite"
                   >
-                    ♡
+                    ❤️
                   </button>
-                 <button
-  type="button"
-  onClick={() => product && dispatch(addToCart(product))}
-  className="w-11 h-11 rounded-full border border-[#E6E6E6] flex items-center justify-center"
-  aria-label="Cart"
->
-  🛒
-</button>
+                  <button
+                    type="button"
+                    onClick={() => product && dispatch(addToCart(product))}
+                    className="w-11 h-11 rounded-full border border-[#E6E6E6] flex items-center justify-center"
+                    aria-label="Cart"
+                  >
+                    🛒
+                  </button>
                   <button
                     type="button"
                     className="w-11 h-11 rounded-full border border-[#E6E6E6] flex items-center justify-center"
@@ -210,14 +209,8 @@ function ProductDetailContent({ productId }) {
                 </div>
 
                 <div className="mt-8 flex items-center gap-3">
-                  <button
-                    type="button"
-                    onClick={() => navigate(-1)}
-                    className="px-4 py-2 border border-[#E6E6E6] rounded-[6px] text-[#252B42]"
-                  >
-                    ← Back
-                  </button>
-                  <Link to="/shop" className="text-[#23A6F0] font-bold">
+                 
+                  <Link to="/shop" className="h-11 px-7 bg-white text-[#23A6F0] font-bold rounded-[5px]">
                     Back to Shop
                   </Link>
                 </div>

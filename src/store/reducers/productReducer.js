@@ -9,6 +9,9 @@ import {
   SET_SORT,
   SET_PRODUCT_FETCH_STATE,
   SET_PRODUCT,
+  SET_HOME_PRODUCT_LIST,
+  SET_HOME_TOTAL,
+  SET_HOME_PRODUCT_FETCH_STATE,
 } from "../actions/productActions";
 
 const initialState = {
@@ -22,7 +25,11 @@ const initialState = {
 
   fetchState: "NOT_FETCHED",          // categories state
   productFetchState: "NOT_FETCHED",   // products list OR product detail state
-  product: null,                      // ✅ T16 detail
+  product: null,  
+  
+  homeProductList: [],
+  homeTotal: 0,
+  homeProductFetchState: "NOT_FETCHED",
 };
 
 export default function productReducer(state = initialState, action) {
@@ -49,6 +56,14 @@ export default function productReducer(state = initialState, action) {
 
     case SET_PRODUCT:
       return { ...state, product: action.payload };
+
+    // ✅ HomePage
+    case SET_HOME_PRODUCT_LIST:
+      return { ...state, homeProductList: action.payload };
+    case SET_HOME_TOTAL:
+      return { ...state, homeTotal: action.payload };
+    case SET_HOME_PRODUCT_FETCH_STATE:
+      return { ...state, homeProductFetchState: action.payload };
 
     default:
       return state;

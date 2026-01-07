@@ -9,7 +9,6 @@ import { Link } from "react-router-dom";
 import { vitaClassicSlides } from "../../data/homePageData";
 
 export default function VitaSection() {
-  // Eğer data tek slide ise, slider görsel olarak "slide" gibi çalışsın diye 2'liyoruz
   const slides =
     vitaClassicSlides.length > 1
       ? vitaClassicSlides
@@ -21,7 +20,7 @@ export default function VitaSection() {
         modules={[Navigation, Pagination]}
         navigation
         pagination={{ clickable: true }}
-        className="w-full"
+        className="w-full vita-swiper"
       >
         {slides.map((s, idx) => (
           <SwiperSlide key={`${s.id}-${idx}`}>
@@ -30,51 +29,73 @@ export default function VitaSection() {
               <img
                 src={s.bg}
                 alt={s.title}
-                className="w-full h-[753px] object-cover"
+                className="w-full h-[620px] md:h-[753px] object-cover"
               />
 
-              {/* overlay content */}
+              {/* ✅ readability overlay */}
+              <div className="absolute inset-0 bg-gradient-to-r from-black/55 via-black/25 to-black/10" />
+              <div className="absolute inset-0 bg-black/10" />
+
+              {/* content */}
               <div className="absolute inset-0 w-full flex items-center">
-                <div className="w-full max-w-6xl mx-auto px-4 flex flex-col md:flex-row items-center justify-between gap-10">
-                  {/* left */}
-                  <div className="flex flex-col items-start text-white">
-                    <div className="font-bold text-[16px] leading-[24px] tracking-[0.1px]">
-                      {s.season}
-                    </div>
-
-                    <div className="mt-4 font-bold text-[40px] leading-[50px] tracking-[0.2px]">
-                      {s.title}
-                    </div>
-
-                    <div className="mt-4 text-[20px] leading-[30px] tracking-[0.2px] max-w-[380px]">
-                      {s.desc}
-                    </div>
-
-                    {/* price + button (buton fiyatın altında) */}
-                    <div className="mt-6 flex flex-col items-start gap-4">
-                      <div className="font-bold text-[24px] leading-[32px]">
-                        {s.price}
+                <div className="w-full max-w-6xl mx-auto px-4">
+                  <div className="w-full flex flex-col md:flex-row items-center justify-between gap-10">
+                    {/* left */}
+                    <div className="w-full md:w-1/2 flex flex-col items-start text-white">
+                      {/* badge */}
+                      <div className="inline-flex items-center gap-2 rounded-full bg-white/10 backdrop-blur px-3 py-1 text-[12px] md:text-[14px] font-bold tracking-[0.1px]">
+                        {s.season}
                       </div>
 
-                      <Link
-                        to={s.href || "/"}
-                        className="bg-[#2DC071] rounded-[5px] px-8 py-3 font-bold text-[14px] leading-[22px] tracking-[0.2px] text-white"
-                      >
-                        {s.button}
-                      </Link>
-                    </div>
-                  </div>
+                      <h2 className="mt-4 font-bold tracking-[0.2px] text-[30px] leading-[38px] md:text-[44px] md:leading-[54px]">
+                        {s.title}
+                      </h2>
 
-                  {/* right person */}
-                  <div className="w-full md:w-[420px] flex items-end justify-center">
-                    <img
-                      src={s.personPng}
-                      alt="Vita Classic"
-                      className="max-h-[520px] w-auto object-contain"
-                    />
+                      <p className="mt-3 text-white/90 text-[16px] leading-[24px] md:text-[20px] md:leading-[30px] tracking-[0.2px] max-w-[520px]">
+                        {s.desc}
+                      </p>
+
+                      {/* price + button */}
+                      <div className="mt-6 flex flex-col sm:flex-row sm:items-center gap-4">
+                        <div className="font-bold text-[22px] md:text-[24px] leading-[32px]">
+                          {s.price}
+                        </div>
+
+                        <Link
+                          to={s.href || "/"}
+                          className="inline-flex items-center justify-center h-11 px-8 rounded-[8px] bg-[#2DC071] font-bold text-[14px] leading-[22px] tracking-[0.2px] text-white
+                                     hover:brightness-95 active:brightness-90
+                                     focus:outline-none focus:ring-2 focus:ring-white/80 focus:ring-offset-2 focus:ring-offset-black/30"
+                          aria-label={s.button}
+                        >
+                          {s.button}
+                        </Link>
+                      </div>
+
+                      {/* micro trust line (opsiyonel ama şık) */}
+                      <div className="mt-5 text-[13px] text-white/80">
+                        Free returns • Fast delivery • Secure payment
+                      </div>
+                    </div>
+
+                    {/* right person */}
+                    <div className="w-full md:w-1/2 flex items-end justify-center">
+                      <div className="relative">
+                        <div className="absolute -inset-6 rounded-[24px] bg-white/10 blur-2xl" />
+                        <img
+                          src={s.personPng}
+                          alt="Vita Classic"
+                          className="relative max-h-[420px] md:max-h-[560px] w-auto object-contain drop-shadow-[0_18px_30px_rgba(0,0,0,0.35)]"
+                          loading="lazy"
+                        />
+                      </div>
+                    </div>
                   </div>
                 </div>
               </div>
+
+            
+              
             </div>
           </SwiperSlide>
         ))}
